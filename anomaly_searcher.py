@@ -36,20 +36,21 @@ def get_dist(llat1, llong1, llat2, llong2):
     return dist
 
 
-def get_segments(group, amplitude):
-    # var = 0
+def get_segments(limit, group, amplitude):
+    var = 1
     end = len(group)
     segments = []
     si = 0
     for count in range(1, end):
+
         # var += get_dist(group['lat'].iloc[count - 1], group['lon'].iloc[count - 1],
         #                 group['lat'].iloc[count], group['lon'].iloc[count])
-        # if var >= limitdist or count is end:
-        min_val = np.fabs(group['thickness'].iloc[si:count].min())
-        max_val = np.fabs(group['thickness'].iloc[si:count].max())
-        if (max_val - min_val) > amplitude:
-            segments.append(group.iloc[si:count])
-            si = count
+        if var >= limit or count is end:
+            min_val = np.fabs(group['thickness'].iloc[si:count].min())
+            max_val = np.fabs(group['thickness'].iloc[si:count].max())
+            if (max_val - min_val) > amplitude:
+                segments.append(group.iloc[si:count])
+                si = count
         # var = 0
     return segments
 
