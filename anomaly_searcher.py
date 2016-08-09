@@ -36,6 +36,20 @@ def get_dist(llat1, llong1, llat2, llong2):
     return dist
 
 
+def get_deduct(group, si, count):
+    deduct = 0
+    for k in range(si, count):
+        deduct += (np.fabs(group['thickness'].iloc[k]) -
+                   np.fabs(group['thickness'].iloc[k - 1]))
+    return deduct
+
+
+def max_amplitude(group, si, count):
+    min_val = group['thickness'].iloc[si:count].min()
+    max_val = group['thickness'].iloc[si:count].max()
+    return max_val - min_val
+
+
 def get_segments(limit, group, amplitude):
     var = 1
     end = len(group)
