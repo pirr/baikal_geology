@@ -129,6 +129,19 @@ for name, group in filegroups.items():
     # sys.stdout.write("\033[F")
     # sys.stdout.write("\033[K")
 
+    # sys.stdout.flush()
+    # print('\n')
+
+# segments_dict = {k: v for k, v in segments_dict.items() if len(v) > 4}
+# jumps_dict = dict()
+# merging_segments_dict = dict()
+# for name, segments in segments_dict.items():
+#     merging_segments_dict[name] = merge_segments(segments)
+#     plt.plot(merging_segments_dict[name][0]['thickness'])
+#     plt.axis([merging_segments_dict[name][0]['frame'].min(),
+#               merging_segments_dict[name][0]['frame'].max(),
+#               merging_segments_dict[name][0]['thickness'].min(),
+#               merging_segments_dict[name][0]['thickness'].max()])
 
 draft_reestr = []
 for name, segments in segments_dict.items():
