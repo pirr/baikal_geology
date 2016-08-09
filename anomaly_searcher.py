@@ -57,7 +57,7 @@ def get_segments(limit, group, amplitude):
     si = 0
     for count in range(1, end):
         sys.stdout.write(
-            'Processing... {0}/{1} found:{2}\r'
+            'processing search segments... {}/{} found:{}\r'
             .format(count, fin, len(segments)))
         sys.stdout.flush()
         deduct = get_deduct(group, si, count)
@@ -78,6 +78,7 @@ def merge_segments(segments):
     r = list(range(1, len(segments)))
     jumps_dict[name] = [1] * len(segments)
     while r:
+        sys.stdout.write('processing merging segments... {}\r'.format(len(r)))
         i = r[0]
         if segments[i - 1].iloc[-1]['frame'] + 1 == segments[i].iloc[0]['frame']:
             segments[i - 1] = pd.concat([segments[i - 1], segments.pop(i)])
@@ -122,18 +123,15 @@ len_dict = dict()
 limit = 100
 amplitude = 20
 for name, group in filegroups.items():
+    sys.stdout.write(name + ':\n')
     len_dict[name] = get_segments(limit, group, amplitude)
+    
+    sys.stdout.write("\033[K")
+    sys.stdout.write('found {} segments in {} frames\n'.format(
+        len(segments_dict[name]), len(group)))
+    # sys.stdout.write("\033[F")
+    # sys.stdout.write("\033[K")
 
-len_dict = {k: v for k, v in len_dict.items() if len(v) > 4}
-jumps_dict = dict()
-segments_dict = dict()
-for name, segments in len_dict.items():
-    segments_dict[name] = merge_segments(segments)
-    plt.plot(segments_dict[name][0]['thickness'])
-    plt.axis([segments_dict[name][0]['frame'].min(),
-              segments_dict[name][0]['frame'].max(),
-              segments_dict[name][0]['thickness'].min(),
-              segments_dict[name][0]['thickness'].max()])
 
 draft_reestr = []
 for name, segments in segments_dict.items():
