@@ -51,7 +51,6 @@ def max_amplitude(group, si, count):
 
 
 def get_segments(limit, group, amplitude):
-    var = 1
     end = len(group)
     fin = end - 1
     segments = []
@@ -111,8 +110,6 @@ for f in uwb_logs_files:
     filegroups[gps_f] = uwb_log_df
 
 
-# filegroups = uwb_log_df.groupby('gpsfilename')
-
 #     print(gps_f, len(data[data['gpsfilename'] == gps_f]), len(uwb_log_df))
 # data = pd.merge(data, uwb_log_df, how='outer', on=['gpsfilename', 'frame'])
 # print(gps_f,
@@ -123,11 +120,9 @@ for f in uwb_logs_files:
 
 len_dict = dict()
 limit = 100
-# limitfrma = 100
 amplitude = 20
 for name, group in filegroups.items():
     len_dict[name] = get_segments(limit, group, amplitude)
-        group, amplitude)
 
 len_dict = {k: v for k, v in len_dict.items() if len(v) > 4}
 jumps_dict = dict()
