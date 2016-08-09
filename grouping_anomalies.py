@@ -1,0 +1,72 @@
+import pandas as pd
+from openpyxl import load_workbook
+from sklearn.neighbors import DistanceMetric
+import numpy as np
+
+import networkx as nx
+import matplotlib.pyplot as plt
+# from matplotlib.ticker import ScalarFormatter
+
+dist = DistanceMetric.get_metric(metric='haversine')
+
+df = pd.read_excel('testdata//Реестр проявлений углеводородов_2707.xlsx')
+cols = [c for c in df.columns[:5]]
+cols.extend(df.columns[13:])
+reestr = df[7:][cols]
+coords = reestr[['y', 'x']].as_matrix()
+yx = coords / 57.29578
+D = dist.pairwise(yx)
+
+for i in range(len(D)):
+    D[i, :i + 1] = np.nan
+
+r = D * 6372795
+
+rx = np.where(r <= 100, r, np.NAN)
+true_indexes = np.argwhere(~np.isnan(rx))
+dist = rx[~np.isnan(rx)]
+
+nodes = np.union1d(true_indexes[:, 0], true_indexes[:, 1])
+# xy_nodes = coords[nodes,::-1]
+# pos = {n: p for n, p in zip(nodes, xy_nodes)}
+
+G = nx.Graph()
+G.add_nodes_from(nodes)
+G.add_edges_from(true_indexes)
+
+triangle = [x for x, v in nx.triangles(G).items() if v > 0]
+to_remove = [x for x in G.nodes() if x not in triangle]
+G.remove_nodes_from(to_remove)
+
+xy_nodes = coords[G.nodes(), ::-1]
+pos = {n: p for n, p in zip(G.nodes(), xy_nodes)}
+
+d = nx.degree(G)
+nx.draw(G, pos=pos, edge_vmax=1, node_color='#A0CBE2',
+        node_size=[v * 100 for v in d.values()])
+nx.draw_networkx_labels(G, pos, font_size=10, font_family='sans-serif')
+
+groups = list(nx.connected_components(G))
+groups_dict = {}
+for item in groups:
+    i = list(item)[0]
+    num = int(reestr['№'].iloc[i])
+    groups_dict[num] = item
+res = []
+reestr['group'] = np.nan
+
+for num, indexes in groups_dict.items():
+    reestr['group'].iloc[list(indexes)] = num
+
+# book = load_workbook('output.xlsx')
+# writer = pd.ExcelWriter('output.xlsx', engine='openpyxl')
+# writer.book = book
+# writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
+# reestr.to_excel(writer, "Реестр_треугольники")
+# writer.save()
+# writer = pd.ExcelWriter('output.xlsx')
+# reestr.to_excel(writer, 'Реестр_расстояние')
+# writer.save()
+
+plt.ticklabel_format(style='plain', axis='both', useOffset=False)
+plt.show()
