@@ -77,7 +77,7 @@ def get_segments(limit, group, amplitude):
 
 def merge_segments(segments):
     r = list(range(1, len(segments)))
-    jumps_dict[name] = [0] * len(segments)
+    jumps_dict[name] = [1] * len(segments)
     while r:
         i = r[0]
         if segments[i - 1].iloc[-1]['frame'] + 1 == segments[i].iloc[0]['frame']:
