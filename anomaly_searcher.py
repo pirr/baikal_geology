@@ -122,11 +122,11 @@ for f in uwb_logs_files:
 
 
 len_dict = dict()
-# var = 0
+limit = 100
 # limitfrma = 100
 amplitude = 20
 for name, group in filegroups.items():
-    len_dict[name] = get_segments(
+    len_dict[name] = get_segments(limit, group, amplitude)
         group, amplitude)
 
 len_dict = {k: v for k, v in len_dict.items() if len(v) > 4}
