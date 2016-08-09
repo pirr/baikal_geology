@@ -115,12 +115,12 @@ for f in uwb_logs_files:
 #       )
 
 
-len_dict = dict()
+segments_dict = dict()
 limit = 100
 amplitude = 20
 for name, group in filegroups.items():
     sys.stdout.write(name + ':\n')
-    len_dict[name] = get_segments(limit, group, amplitude)
+    segments_dict[name] = get_segments(limit, group[:3000], amplitude)
     
     sys.stdout.write("\033[K")
     sys.stdout.write('found {} segments in {} frames\n'.format(
