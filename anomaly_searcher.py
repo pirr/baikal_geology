@@ -59,7 +59,6 @@ def get_segments(limit, group, amplitude):
         sys.stdout.write(
             'processing search segments... {}/{} found:{}\r'
             .format(count, fin, len(segments)))
-        sys.stdout.flush()
         deduct = get_deduct(group, si, count)
 
         if deduct >= amplitude:
@@ -70,7 +69,6 @@ def get_segments(limit, group, amplitude):
                 segments.append(group.iloc[si:count])
         elif (count - si) == limit:
             si = si + 1
-
     return segments
 
 
@@ -87,8 +85,6 @@ def merge_segments(segments):
             r.pop()
         else:
             r.pop(0)
-
-    print('total', len(segments), name)
 
     return segments
 
