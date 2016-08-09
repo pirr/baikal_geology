@@ -74,19 +74,19 @@ def get_segments(limit, group, amplitude):
 
 def merge_segments(segments):
     r = list(range(1, len(segments)))
-    jumps_dict[name] = [1] * len(segments)
+    jumps = [1] * len(segments)
     while r:
         sys.stdout.write('processing merging segments... {}\r'.format(len(r)))
         i = r[0]
         if segments[i - 1].iloc[-1]['frame'] + 1 == segments[i].iloc[0]['frame']:
             segments[i - 1] = pd.concat([segments[i - 1], segments.pop(i)])
-            jumps_dict[name][i - 1] += 1
-            jumps_dict[name].pop(i)
+            jumps[i - 1] += 1
+            jumps.pop(i)
             r.pop()
         else:
             r.pop(0)
 
-    return segments
+    return segments, jumps
 
 # data = pd.read_csv('testdata/resultgpsdel.csv', sep=';')
 # filegroups = data.groupby('gpsfilename')
