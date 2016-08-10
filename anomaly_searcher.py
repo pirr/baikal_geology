@@ -26,10 +26,7 @@ def get_segments(limit, group, amplitude):
     startframe = 0
     start_anomaly = None
     deduct = None
-    frames = list(range(1, end))
-    while frames:
-        endframe = frames[0]
-
+    for endframe in list(range(1, end)):
         deduct = get_deduct(group, startframe, endframe)
         sys.stdout.write(
             'processtartframeng search segments... {3}:{0}/{1} found:{2} || {4}, {5}\r'
@@ -51,7 +48,6 @@ def get_segments(limit, group, amplitude):
         if (endframe - startframe) > limit:
             startframe = endframe
 
-        frames.pop(0)
     return segments
 
 
