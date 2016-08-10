@@ -6,7 +6,7 @@ import math
 import re
 
 
-def get_dist(llat1, llong1, llat2, llong2):
+def get_deduct(group, startframe, endframe):
     rad = 6372795
 
     lat1 = llat1 * math.pi / 180.
