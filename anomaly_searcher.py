@@ -138,7 +138,7 @@ for name, group in filegroups.items():
     segments_dict[name] = get_segments(limit, group, amplitude)
     segments_dict[name], jumps_dict[name] = merge_segments(segments_dict[name])
     sys.stdout.write("\033[K")
-    sys.stdout.write('found {} segments in {} frames\n'.format(
+    sys.stdout.write(' ' * 10 + 'found {} segments in {} frames\n'.format(
         len(segments_dict[name]), len(group)))
     # sys.stdout.write("\033[F")
     # sys.stdout.write("\033[K")
