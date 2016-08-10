@@ -55,20 +55,34 @@ def get_segments(limit, group, amplitude):
     fin = end - 1
     segments = []
     si = 0
-    for count in range(1, end):
-        sys.stdout.write(
-            'processing search segments... {}/{} found:{}\r'
-            .format(count, fin, len(segments)))
-        deduct = get_deduct(group, si, count)
+    start_anomaly = None
+    deduct = None
+    frames = list(range(1, end))
+    while frames:
+        count = frames[0]
 
-        if deduct >= amplitude:
-            segments.append(group.iloc[si:count])
-            si = count
+        deduct = get_deduct(group, si, count)
+        sys.stdout.write(
+            'processing search segments... {3}:{0}/{1} found:{2} || {4}, {5}\r'
+            .format(count, fin, len(segments), si, start_anomaly, deduct))
+
+        if np.fabs(deduct) >= amplitude:
+            if start_anomaly is not None:
+                if start_anomaly[0] / deduct < 0:
+                    segments.append(group.iloc[start_anomaly[1]:count])
+                    start_anomaly = None
+                    si = count
+            else:
+                start_anomaly = [deduct, si]
+
         elif count is fin:
             if max_amplitude(group, si, count) >= amplitude:
                 segments.append(group.iloc[si:count])
-        elif (count - si) == limit:
-            si = si + 1
+
+        if (count - si) > limit:
+            si = count
+
+        frames.pop(0)
     return segments
 
 
