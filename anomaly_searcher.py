@@ -152,4 +152,3 @@ df_protocol = pd.DataFrame(draft_reestr,
                                'jumps', 'other',
                                'file_name', 'file_source'
                            ])
-
