@@ -105,7 +105,7 @@ def merge_segments(segments):
 # data = pd.read_csv('testdata/resultgpsdel.csv', sep=';')
 # filegroups = data.groupby('gpsfilename')
 filegroups = dict()
-uwb_logs_folder = 'testdata'
+uwb_logs_folder = '!UWB_logs'
 uwb_logs_files = (f for f in os.listdir(uwb_logs_folder) if f[-3:] == 'del')
 
 for f in uwb_logs_files:
