@@ -1,12 +1,7 @@
-# import matplotlib.pyplot as plt
-# from matplotlib.ticker import ScalarFormatter
 import sys
 import os
 import numpy as np
 import pandas as pd
-from sklearn.neighbors import DistanceMetric
-import matplotlib.pyplot as plt
-# from scipy import stats
 import math
 import re
 
@@ -102,8 +97,6 @@ def merge_segments(segments):
 
     return segments, jumps
 
-# data = pd.read_csv('testdata/resultgpsdel.csv', sep=';')
-# filegroups = data.groupby('gpsfilename')
 filegroups = dict()
 uwb_logs_folder = '!UWB_logs'
 uwb_logs_files = (f for f in os.listdir(uwb_logs_folder) if f[-3:] == 'del')
@@ -121,14 +114,6 @@ for f in uwb_logs_files:
     filegroups[gps_f] = uwb_log_df
 
 
-#     print(gps_f, len(data[data['gpsfilename'] == gps_f]), len(uwb_log_df))
-# data = pd.merge(data, uwb_log_df, how='outer', on=['gpsfilename', 'frame'])
-# print(gps_f,
-#       len(data[data['gpsfilename'] == gps_f]),
-#       len(data[(~pd.isnull(data['lon'])) & (data['gpsfilename'] == gps_f)])
-#       )
-
-
 segments_dict = dict()
 jumps_dict = dict()
 limit = 300
@@ -140,33 +125,11 @@ for name, group in filegroups.items():
     sys.stdout.write("\033[K")
     sys.stdout.write(' ' * 10 + 'found {} segments in {} frames\n'.format(
         len(segments_dict[name]), len(group)))
-    # sys.stdout.write("\033[F")
-    # sys.stdout.write("\033[K")
-
-    # sys.stdout.flush()
-    # print('\n')
-
-# segments_dict = {k: v for k, v in segments_dict.items() if len(v) > 4}
-# jumps_dict = dict()
-# merging_segments_dict = dict()
-# for name, segments in segments_dict.items():
-#     merging_segments_dict[name] = merge_segments(segments)
-#     plt.plot(merging_segments_dict[name][0]['thickness'])
-#     plt.axis([merging_segments_dict[name][0]['frame'].min(),
-#               merging_segments_dict[name][0]['frame'].max(),
-#               merging_segments_dict[name][0]['thickness'].min(),
-#               merging_segments_dict[name][0]['thickness'].max()])
 
 draft_reestr = []
 for name, segments in segments_dict.items():
     date = re.search(r'[0-9]{2}\.[0-9]{2}\.[0-9]{4}', name).group(0)
     for k, segment in enumerate(segments):
-        # seg_dist = sum(get_dist(
-        #     segment['lat'].iloc[i - 1],
-        #     segment['lon'].iloc[i - 1],
-        #     segment['lat'].iloc[i],
-        #     segment['lon'].iloc[i])
-        #     for i in range(1, len(segment)))
         min_val = np.fabs(segment['thickness'].min())
         max_val = np.fabs(segment['thickness'].max())
         draft_reestr.append([
@@ -190,55 +153,3 @@ df_protocol = pd.DataFrame(draft_reestr,
                                'file_name', 'file_source'
                            ])
 
-plt.show()
-# df_station = pd.read_csv('Station_summer_2016.csv', sep=';', encoding='utf8')
-# df_anomaly = pd.read_csv('увеличенная_таблица.csv', sep=';', encoding='utf8')
-
-# df_reestr = pd.read_excel(
-#     'Реестр проявлений углеводородов_2807_автогруппировка.xlsx')
-# cols = [c for c in df_reestr.columns[:5]]
-# cols.extend(df_reestr.columns[13:])
-# reestr = df_reestr[7:][cols]
-# coords = reestr[['y', 'x']].as_matrix()
-
-
-# df_anomaly['x,N,16,6'] = df_anomaly[
-#     'x,N,16,6'].str.replace(',', '.').astype(float)
-# df_anomaly['y,N,16,6'] = df_anomaly[
-#     'y,N,16,6'].str.replace(',', '.').astype(float)
-# df_station['LAT,N,16,12'] = df_station[
-#     'LAT,N,16,12'].str.replace(',', '.').astype(float)
-# df_station['LONG,N,16,13'] = df_station[
-#     'LONG,N,16,13'].str.replace(',', '.').astype(float)
-
-
-# station_YX = df_station[['LAT,N,16,12', 'LONG,N,16,13']].as_matrix()
-# anomaly_YX = df_anomaly[['y,N,16,6', 'x,N,16,6']].as_matrix()
-# protocol_XY = df_protocol['coords']
-
-# total = len(protocol_XY)
-# for ir, crs in enumerate(protocol_XY):
-#     min_dist_stat = None
-#     min_dist_anom = None
-
-#     print('\rProcessing search nearest anomalys, station... {}/{}'.format(ir, total))
-
-#     for cr in crs:
-
-#         for ist, cst in enumerate(station_YX):
-#             dist = get_dist(cr[1], cr[0], cst[0], cst[1])
-#             if min_dist_stat is None or dist < min_dist_stat[0]:
-#                 min_dist_stat = [dist, ist]
-
-#         if min_dist_stat[0] < 2000:
-#             df_protocol['station'].iloc[ir] = df_station[
-#                 'STATION,C,5'].iloc[min_dist_stat[1]]
-
-#         for ian, can in enumerate(anomaly_YX):
-#             dist = get_dist(cr[1], cr[0], can[0], can[1])
-#             if min_dist_anom is None or dist < min_dist_anom[0]:
-#                 min_dist_anom = [dist, ian]
-
-#         if min_dist_anom[0] < 2000:
-#             df_protocol['other'].iloc[ir] = df_anomaly[
-#                 'имя,C,254'].iloc[min_dist_anom[1]]
