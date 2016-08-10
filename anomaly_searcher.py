@@ -39,8 +39,8 @@ def get_dist(llat1, llong1, llat2, llong2):
 def get_deduct(group, si, count):
     deduct = 0
     for k in range(si, count):
-        deduct += (np.fabs(group['thickness'].iloc[k]) -
-                   np.fabs(group['thickness'].iloc[k - 1]))
+        deduct += (group['thickness'].iloc[k] -
+                   group['thickness'].iloc[k - 1])
     return deduct
 
 
