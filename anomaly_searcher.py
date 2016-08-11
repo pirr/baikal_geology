@@ -28,9 +28,11 @@ def get_segments(limit, amplitude, group):
     deduct = None
     for endframe in list(range(1, end)):
         deduct = get_deduct(group, startframe, endframe)
+        sys.stdout.write("\033[K")
         sys.stdout.write(
-            'processtartframeng search segments... {3}:{0}/{1} found:{2} || {4}, {5}\r'
-            .format(endframe, fin, len(segments), startframe, start_anomaly, deduct))
+            'process search segments... {3:6d}:{0:6d}/{1:6d} found:{2:3d} || {4}, {5:3d}\r'
+            .format(endframe, fin, len(segments),
+                    startframe, start_anomaly, int(deduct)))
 
         if np.fabs(deduct) >= amplitude:
             if start_anomaly is not None:
