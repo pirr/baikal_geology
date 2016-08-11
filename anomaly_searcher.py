@@ -67,21 +67,40 @@ def merge_segments(segments):
 
     return segments, jumps
 
-filegroups = dict()
-uwb_logs_folder = '!UWB_logs'
-uwb_logs_files = (f for f in os.listdir(uwb_logs_folder) if f[-3:] == 'del')
 
-for f in uwb_logs_files:
-    uwb_log_df = pd.read_csv(os.path.join(uwb_logs_folder, f), sep=' ')
-    uwb_log_df = uwb_log_df.ix[:, 0:3]
-    uwb_log_df.columns = ['frame', 'min', 'max']
-    gps_f = ''.join([f[:-3], 'gps'])
-    uwb_log_df['gpsfilename'] = gps_f
-    uwb_log_df['min'] = uwb_log_df['min'].str.replace(',', '.').astype(float)
-    uwb_log_df['max'] = uwb_log_df['max'].str.replace(',', '.').astype(float)
-    uwb_log_df['thickness'] = uwb_log_df.apply(
+def join_coords(del_df, gps_df):
+    del_df = pd.merge(del_df, gps_df, how='outer')
+    del_df = del_df.interpolate(method='linear', limit_direction='both')
+    return del_df
+
+filegroups = dict()
+uwb_logs_folder = 'testdata'
+del_logs_files = (f for f in os.listdir(uwb_logs_folder) if f[-3:] == 'del')
+gps_logs_files = (f for f in os.listdir(uwb_logs_folder) if f[-3:] == 'gps')
+
+for f in del_logs_files:
+    del_log_df = pd.read_csv(os.path.join(uwb_logs_folder, f), sep=' ')
+    del_log_df = del_log_df.ix[:, 0:3]
+    del_log_df.columns = ['frame', 'min', 'max']
+    del_log_df.set_index(del_log_df['frame'], inplace=True)
+    f = f[:-3]
+    del_log_df['filename'] = f
+    gps_f = ''.join([f, 'gps'])
+    del_log_df['gpsfilename'] = gps_f
+    del_log_df['min'] = del_log_df['min'].str.replace(',', '.').astype(float)
+    del_log_df['max'] = del_log_df['max'].str.replace(',', '.').astype(float)
+    del_log_df['thickness'] = del_log_df.apply(
         lambda row: (row['max'] - row['min']) * 8.93561103810775, axis=1)
-    filegroups[gps_f] = uwb_log_df
+    filegroups[gps_f] = del_log_df
+
+    if gps_f in gps_logs_files:
+        gps_log_df = pd.read_csv(os.path.join(uwb_logs_folder, gps_f), sep=' ')
+        gps_log_df = gps_log_df.ix[:, 0:3]
+        gps_log_df.columns = ['frame', 'x', 'y']
+        gps_log_df['x'] = gps_log_df['x'].str.replace(',', '.').astype(float)
+        gps_log_df['y'] = gps_log_df['y'].str.replace(',', '.').astype(float)
+        gps_log_df.set_index(gps_log_df['frame'], inplace=True)
+        del_log_df = join_coords(del_log_df, gps_log_df)
 
 
 segments_dict = dict()
