@@ -76,7 +76,7 @@ def join_coords(del_df, gps_df):
     return del_df
 
 
-if name == '__main__':
+if __name__ == '__main__':
     filegroups = dict()
     uwb_logs_folder = 'testdata'
     del_logs_files = (f for f in os.listdir(uwb_logs_folder) if f[-3:] == 'del')
