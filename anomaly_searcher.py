@@ -2,46 +2,20 @@ import sys
 import os
 import numpy as np
 import pandas as pd
-import math
 import re
 
 
-def get_dist(llat1, llong1, llat2, llong2):
-    rad = 6372795
-
-    lat1 = llat1 * math.pi / 180.
-    lat2 = llat2 * math.pi / 180.
-    long1 = llong1 * math.pi / 180.
-    long2 = llong2 * math.pi / 180.
-
-    cl1 = math.cos(lat1)
-    cl2 = math.cos(lat2)
-    sl1 = math.sin(lat1)
-    sl2 = math.sin(lat2)
-    delta = long2 - long1
-    cdelta = math.cos(delta)
-    sdelta = math.sin(delta)
-
-    y = math.sqrt(math.pow(cl2 * sdelta, 2) +
-                  math.pow(cl1 * sl2 - sl1 * cl2 * cdelta, 2))
-    x = sl1 * sl2 + cl1 * cl2 * cdelta
-    ad = math.atan2(y, x)
-    dist = ad * rad
-
-    return dist
-
-
-def get_deduct(group, si, count):
+def get_deduct(group, startframe, endframe):
     deduct = 0
-    for k in range(si, count):
+    for k in range(startframe, endframe):
         deduct += (group['thickness'].iloc[k] -
                    group['thickness'].iloc[k - 1])
     return deduct
 
 
-def max_amplitude(group, si, count):
-    min_val = group['thickness'].iloc[si:count].min()
-    max_val = group['thickness'].iloc[si:count].max()
+def max_amplitude(group, startframe, endframe):
+    min_val = group['thickness'].iloc[startframe:endframe].min()
+    max_val = group['thickness'].iloc[startframe:endframe].max()
     return max_val - min_val
 
 
@@ -49,35 +23,31 @@ def get_segments(limit, group, amplitude):
     end = len(group)
     fin = end - 1
     segments = []
-    si = 0
+    startframe = 0
     start_anomaly = None
     deduct = None
-    frames = list(range(1, end))
-    while frames:
-        count = frames[0]
-
-        deduct = get_deduct(group, si, count)
+    for endframe in list(range(1, end)):
+        deduct = get_deduct(group, startframe, endframe)
         sys.stdout.write(
-            'processing search segments... {3}:{0}/{1} found:{2} || {4}, {5}\r'
-            .format(count, fin, len(segments), si, start_anomaly, deduct))
+            'processtartframeng search segments... {3}:{0}/{1} found:{2} || {4}, {5}\r'
+            .format(endframe, fin, len(segments), startframe, start_anomaly, deduct))
 
         if np.fabs(deduct) >= amplitude:
             if start_anomaly is not None:
                 if start_anomaly[0] / deduct < 0:
-                    segments.append(group.iloc[start_anomaly[1]:count])
+                    segments.append(group.iloc[start_anomaly[1]:endframe])
                     start_anomaly = None
-                    si = count
+                    startframe = endframe
             else:
-                start_anomaly = [deduct, si]
+                start_anomaly = [deduct, startframe]
 
-        elif count is fin:
-            if max_amplitude(group, si, count) >= amplitude:
-                segments.append(group.iloc[si:count])
+        elif endframe is fin:
+            if max_amplitude(group, startframe, endframe) >= amplitude:
+                segments.append(group.iloc[startframe:endframe])
 
-        if (count - si) > limit:
-            si = count
+        if (endframe - startframe) > limit:
+            startframe = endframe
 
-        frames.pop(0)
     return segments
 
 
@@ -152,4 +122,3 @@ df_protocol = pd.DataFrame(draft_reestr,
                                'jumps', 'other',
                                'file_name', 'file_source'
                            ])
-
