@@ -19,7 +19,7 @@ def max_amplitude(group, startframe, endframe):
     return np.fabs(max_val - min_val)
 
 
-def get_segments(limit, group, amplitude):
+def get_segments(limit, amplitude, group):
     end = len(group)
     fin = end - 1
     segments = []
@@ -69,7 +69,7 @@ def merge_segments(segments):
 
 
 def join_coords(del_df, gps_df):
-    del_df = pd.merge(del_df, gps_df, how='outer')
+    del_df = pd.merge(del_df, gps_df, how='outer', on=['frame'])
     del_df = del_df.interpolate(method='linear', limit_direction='both')
     return del_df
 
@@ -91,16 +91,15 @@ for f in del_logs_files:
     del_log_df['max'] = del_log_df['max'].str.replace(',', '.').astype(float)
     del_log_df['thickness'] = del_log_df.apply(
         lambda row: (row['max'] - row['min']) * 8.93561103810775, axis=1)
-    filegroups[gps_f] = del_log_df
+    gps_log_df = pd.read_csv(os.path.join(uwb_logs_folder, gps_f), sep=' ')
+    gps_log_df = gps_log_df.ix[:, 0:3]
+    gps_log_df.columns = ['frame', 'x', 'y']
+    gps_log_df['x'] = gps_log_df['x'].str.replace(',', '.').astype(float)
+    gps_log_df['y'] = gps_log_df['y'].str.replace(',', '.').astype(float)
+    del_log_df = join_coords(del_log_df, gps_log_df)
+    del_log_df = del_log_df.dropna()
 
-    if gps_f in gps_logs_files:
-        gps_log_df = pd.read_csv(os.path.join(uwb_logs_folder, gps_f), sep=' ')
-        gps_log_df = gps_log_df.ix[:, 0:3]
-        gps_log_df.columns = ['frame', 'x', 'y']
-        gps_log_df['x'] = gps_log_df['x'].str.replace(',', '.').astype(float)
-        gps_log_df['y'] = gps_log_df['y'].str.replace(',', '.').astype(float)
-        gps_log_df.set_index(gps_log_df['frame'], inplace=True)
-        del_log_df = join_coords(del_log_df, gps_log_df)
+    filegroups[gps_f] = del_log_df
 
 
 segments_dict = dict()
@@ -109,7 +108,7 @@ limit = 300
 amplitude = 20
 for name, group in filegroups.items():
     sys.stdout.write(name + ':\n')
-    segments_dict[name] = get_segments(limit, group, amplitude)
+    segments_dict[name] = get_segments(limit, amplitude, group)
     segments_dict[name], jumps_dict[name] = merge_segments(segments_dict[name])
     sys.stdout.write("\033[K")
     sys.stdout.write(' ' * 10 + 'found {} segments in {} frames\n'.format(
