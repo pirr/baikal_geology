@@ -16,7 +16,7 @@ def get_deduct(group, startframe, endframe):
 def max_amplitude(group, startframe, endframe):
     min_val = group['thickness'].iloc[startframe:endframe].min()
     max_val = group['thickness'].iloc[startframe:endframe].max()
-    return max_val - min_val
+    return np.fabs(max_val - min_val)
 
 
 def get_segments(limit, group, amplitude):
