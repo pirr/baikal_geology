@@ -1,5 +1,6 @@
 
 import os
+import sys
 import pandas as pd
 from multiprocessing import Pool
 
@@ -48,3 +49,6 @@ if __name__ == '__main__':
     data = pd.concat(data)
     filegroups = data.groupby('filename')
     sd = pool.map(multy_segment_looker, filegroups)
+        sys.stdout.write('\ndata prepared')
+        sys.stdout.write('\nsearch segments')
+    sys.stdout.write('\nanomalys prepared')
