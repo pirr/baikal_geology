@@ -55,4 +55,22 @@ if __name__ == '__main__':
         filegroups = data.groupby('filename')
         sys.stdout.write('\ndata prepared')
         sys.stdout.write('\nsearch segments')
+        anomaly_segments = pool.map(multy_get_anomaly, filegroups)
+        anomaly_segments = [s for s in anomaly_segments if s is not None]
     sys.stdout.write('\nanomalys prepared')
+
+    jumps_dict = dict()
+    if anomaly_segments:
+        anomalys_df = pd.concat(anomaly_segments[0][1][0], ignore_index=True)
+        jumps_dict[anomaly_segments[0][0]] = anomaly_segments[0][1][1]
+    else:
+        print('None anomalys')
+        sys.exit()
+
+    for name, anomalys in anomaly_segments[1:]:
+        jumps_dict[name] = anomalys[1]
+        anomalys = pd.concat(anomalys[0], ignore_index=True)
+        anomalys_df = pd.concat([anomalys_df, anomalys], ignore_index=True)
+
+    anomalys_df.to_csv('ice_anomalies_120816_1335.csv', sep=';')
+    sys.stdout.write('\nDONE')
