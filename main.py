@@ -45,14 +45,14 @@ def multy_get_anomaly(filegroup, limit=300, amplitude=20):
 
 if __name__ == '__main__':
 
-    pool = Pool()
     uwb_logs_folder = 'testdata'
     del_logs_files = (f for f in os.listdir(
         uwb_logs_folder) if f[-3:] == 'del')
-    data = pool.map(multy_get_data, del_logs_files)
-    data = pd.concat(data)
-    filegroups = data.groupby('filename')
-    sd = pool.map(multy_segment_looker, filegroups)
+    with Pool(5) as pool:
+        data = pool.map(
+            partial(multy_get_data, uwb_logs_folder), del_logs_files)
+        data = pd.concat(data)
+        filegroups = data.groupby('filename')
         sys.stdout.write('\ndata prepared')
         sys.stdout.write('\nsearch segments')
     sys.stdout.write('\nanomalys prepared')
