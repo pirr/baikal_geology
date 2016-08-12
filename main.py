@@ -34,13 +34,13 @@ def multy_get_data(uwb_logs_folder, f):
     return del_log_df[['frame', 'filename', 'thickness', 'x', 'y']]
 
 
-def multy_segment_looker(filegroup, limit=300, amplitude=20, segments_dict=dict()):
+def multy_get_anomaly(filegroup, limit=300, amplitude=20):
     name = filegroup[0]
     group = filegroup[1]
-    segments_dict[name] = get_segments(limit, amplitude, group[:3000])
-    segments_dict[name], segments_dict[
-        'jumps'] = merge_segments(segments_dict[name])
-    return segments_dict
+    anomaly_segments = get_segments(limit, amplitude, group)
+    if not anomaly_segments:
+        return None
+    return name, merge_segments(anomaly_segments)
 
 
 if __name__ == '__main__':
