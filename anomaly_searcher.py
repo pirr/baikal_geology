@@ -2,6 +2,7 @@ import sys
 import os
 import numpy as np
 import pandas as pd
+from random import randint
 import re
 
 
@@ -30,9 +31,12 @@ def get_segments(limit, amplitude, group):
         deduct = get_deduct(group, startframe, endframe)
         sys.stdout.write("\033[K")
         sys.stdout.write(
-            'process search segments... {3:6d}:{0:6d}/{1:6d} found:{2:3d} || {4}, {5:3d}\r'
-            .format(endframe, fin, len(segments),
-                    startframe, start_anomaly, int(deduct)))
+            '\r{}'.format('.' * randint(0, 9)))
+        # sys.stdout.write("\033[K")
+        # sys.stdout.write(
+        #     'process search segments... {3:6d}:{0:6d}/{1:6d} found:{2:3d} || {4}, {5:3d}\r'
+        #     .format(endframe, fin, len(segments),
+        #             startframe, start_anomaly, int(deduct)))
 
         if np.fabs(deduct) >= amplitude:
             if start_anomaly is not None:
@@ -57,7 +61,8 @@ def merge_segments(segments):
     r = list(range(1, len(segments)))
     jumps = [1] * len(segments)
     while r:
-        sys.stdout.write('processing merging segments... {}\r'.format(len(r)))
+        # sys.stdout.write("\033[K")
+        # sys.stdout.write('processing merging segments... {}\r'.format(len(r)))
         i = r[0]
         if segments[i - 1].iloc[-1]['frame'] + 1 == segments[i].iloc[0]['frame']:
             segments[i - 1] = pd.concat([segments[i - 1], segments.pop(i)])
