@@ -84,8 +84,10 @@ def join_coords(del_df, gps_df):
 if __name__ == '__main__':
     filegroups = dict()
     uwb_logs_folder = 'testdata'
-    del_logs_files = (f for f in os.listdir(uwb_logs_folder) if f[-3:] == 'del')
-    gps_logs_files = (f for f in os.listdir(uwb_logs_folder) if f[-3:] == 'gps')
+    del_logs_files = (f for f in os.listdir(
+        uwb_logs_folder) if f[-3:] == 'del')
+    gps_logs_files = (f for f in os.listdir(
+        uwb_logs_folder) if f[-3:] == 'gps')
 
     for f in del_logs_files:
         del_log_df = pd.read_csv(os.path.join(uwb_logs_folder, f), sep=' ')
@@ -94,8 +96,10 @@ if __name__ == '__main__':
         f = f[:-3]
         del_log_df['filename'] = f
         gps_f = ''.join([f, 'gps'])
-        del_log_df['min'] = del_log_df['min'].str.replace(',', '.').astype(float)
-        del_log_df['max'] = del_log_df['max'].str.replace(',', '.').astype(float)
+        del_log_df['min'] = del_log_df[
+            'min'].str.replace(',', '.').astype(float)
+        del_log_df['max'] = del_log_df[
+            'max'].str.replace(',', '.').astype(float)
         del_log_df['thickness'] = del_log_df.apply(
             lambda row: (row['max'] - row['min']) * 8.93561103810775, axis=1)
         gps_log_df = pd.read_csv(os.path.join(uwb_logs_folder, gps_f), sep=' ')
@@ -108,7 +112,6 @@ if __name__ == '__main__':
 
         filegroups[gps_f] = del_log_df
 
-
     segments_dict = dict()
     jumps_dict = dict()
     limit = 300
@@ -116,7 +119,8 @@ if __name__ == '__main__':
     for name, group in filegroups.items():
         sys.stdout.write(name + ':\n')
         segments_dict[name] = get_segments(limit, amplitude, group[:3000])
-        segments_dict[name], jumps_dict[name] = merge_segments(segments_dict[name])
+        segments_dict[name], jumps_dict[
+            name] = merge_segments(segments_dict[name])
         sys.stdout.write("\033[K")
         sys.stdout.write(' ' * 10 + 'found {} segments in {} frames\n'.format(
             len(segments_dict[name]), len(group)))
