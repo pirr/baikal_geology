@@ -4,13 +4,20 @@ import numpy as np
 
 import networkx as nx
 import matplotlib.pyplot as plt
+from osgeo import ogr
 # from matplotlib.ticker import ScalarFormatter
+
+
+def _get_point(x, y):
+    point = ogr.Geometry(ogr.wkbPoint)
+    point.AddPoint(x, y)
+    return point
 
 dist = DistanceMetric.get_metric(metric='haversine')
 
-df = pd.read_excel('testdata//Реестр проявлений углеводородов_2707.xlsx')
-cols = [c for c in df.columns[:5]]
-cols.extend(df.columns[13:])
+df = pd.read_excel('testdata//1608_Реестр проявлений углеводородов.xlsx')
+cols = [c for c in df.columns[:10]]
+cols.extend(df.columns[16:])
 reestr = df[7:][cols]
 coords = reestr[['y', 'x']].as_matrix()
 yx = coords / 57.29578
@@ -32,7 +39,6 @@ G.add_nodes_from(nodes)
 G.add_edges_from(true_indexes)
 T = G.copy()
 B = G.copy()
-print(len(T.nodes()))
 triangles = [x for x, v in nx.triangles(G).items() if v > 0]
 binaries = [x for x in G.nodes() if x not in triangles]
 T.remove_nodes_from(binaries)
@@ -57,7 +63,7 @@ for k, g in enumerate([G, B, T]):
     groups_dict = {}
     for item in groups:
         i = list(item)[0]
-        num = int(reestr['№'].iloc[i])
+        num = int(reestr['№ 2015'].iloc[i])
         groups_dict[num] = item
     res = []
     reestr[names[k]] = np.nan
