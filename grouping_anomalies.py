@@ -1,5 +1,4 @@
 import pandas as pd
-from openpyxl import load_workbook
 from sklearn.neighbors import DistanceMetric
 import numpy as np
 
@@ -27,8 +26,6 @@ true_indexes = np.argwhere(~np.isnan(rx))
 dist = rx[~np.isnan(rx)]
 
 nodes = np.union1d(true_indexes[:, 0], true_indexes[:, 1])
-# xy_nodes = coords[nodes,::-1]
-# pos = {n: p for n, p in zip(nodes, xy_nodes)}
 
 G = nx.Graph()
 G.add_nodes_from(nodes)
@@ -40,7 +37,6 @@ triangles = [x for x, v in nx.triangles(G).items() if v > 0]
 binaries = [x for x in G.nodes() if x not in triangles]
 T.remove_nodes_from(binaries)
 B.remove_nodes_from(triangles)
-c = []
 
 colors = ['w', 'r', 'y']
 names = ['cluster', 'binaries', 'triangles']
@@ -68,16 +64,6 @@ for k, g in enumerate([G, B, T]):
 
     for num, indexes in groups_dict.items():
         reestr[names[k]].iloc[list(indexes)] = num
-
-    # book = load_workbook('output.xlsx')
-    # writer = pd.ExcelWriter('output.xlsx', engine='openpyxl')
-    # writer.book = book
-    # writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
-    # reestr.to_excel(writer, "Реестр_треугольники")
-    # writer.save()
-    # writer = pd.ExcelWriter('output.xlsx')
-    # reestr.to_excel(writer, 'Реестр_расстояние')
-    # writer.save()
 
     plt.ticklabel_format(style='plain', axis='both', useOffset=False)
 
