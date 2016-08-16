@@ -33,40 +33,52 @@ nodes = np.union1d(true_indexes[:, 0], true_indexes[:, 1])
 G = nx.Graph()
 G.add_nodes_from(nodes)
 G.add_edges_from(true_indexes)
+T = G.copy()
+B = G.copy()
+print(len(T.nodes()))
+triangles = [x for x, v in nx.triangles(G).items() if v > 0]
+binaries = [x for x in G.nodes() if x not in triangles]
+T.remove_nodes_from(binaries)
+B.remove_nodes_from(triangles)
+c = []
 
-triangle = [x for x, v in nx.triangles(G).items() if v > 0]
-to_remove = [x for x in G.nodes() if x not in triangle]
-G.remove_nodes_from(to_remove)
+colors = ['w', 'r', 'y']
+names = ['cluster', 'binaries', 'triangles']
 
-xy_nodes = coords[G.nodes(), ::-1]
-pos = {n: p for n, p in zip(G.nodes(), xy_nodes)}
+for k, g in enumerate([G, B, T]):
 
-d = nx.degree(G)
-nx.draw(G, pos=pos, edge_vmax=1, node_color='#A0CBE2',
-        node_size=[v * 100 for v in d.values()])
-nx.draw_networkx_labels(G, pos, font_size=10, font_family='sans-serif')
+    xy_nodes = coords[g.nodes(), ::-1]
+    pos = {n: p for n, p in zip(g.nodes(), xy_nodes)}
 
-groups = list(nx.connected_components(G))
-groups_dict = {}
-for item in groups:
-    i = list(item)[0]
-    num = int(reestr['№'].iloc[i])
-    groups_dict[num] = item
-res = []
-reestr['group'] = np.nan
+    d = nx.degree(g)
+    nx.draw(g, pos=pos, edge_vmax=1,
+            node_color=colors[k],
+            edge_color=colors[k],
+            node_size=[v * 100 for v in d.values()])
+    nx.draw_networkx_labels(g, pos, font_size=10, font_family='sans-serif')
 
-for num, indexes in groups_dict.items():
-    reestr['group'].iloc[list(indexes)] = num
+    groups = list(nx.connected_components(g))
+    groups_dict = {}
+    for item in groups:
+        i = list(item)[0]
+        num = int(reestr['№'].iloc[i])
+        groups_dict[num] = item
+    res = []
+    reestr[names[k]] = np.nan
 
-# book = load_workbook('output.xlsx')
-# writer = pd.ExcelWriter('output.xlsx', engine='openpyxl')
-# writer.book = book
-# writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
-# reestr.to_excel(writer, "Реестр_треугольники")
-# writer.save()
-# writer = pd.ExcelWriter('output.xlsx')
-# reestr.to_excel(writer, 'Реестр_расстояние')
-# writer.save()
+    for num, indexes in groups_dict.items():
+        reestr[names[k]].iloc[list(indexes)] = num
 
-plt.ticklabel_format(style='plain', axis='both', useOffset=False)
+    # book = load_workbook('output.xlsx')
+    # writer = pd.ExcelWriter('output.xlsx', engine='openpyxl')
+    # writer.book = book
+    # writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
+    # reestr.to_excel(writer, "Реестр_треугольники")
+    # writer.save()
+    # writer = pd.ExcelWriter('output.xlsx')
+    # reestr.to_excel(writer, 'Реестр_расстояние')
+    # writer.save()
+
+    plt.ticklabel_format(style='plain', axis='both', useOffset=False)
+
 plt.show()
