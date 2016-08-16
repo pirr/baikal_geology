@@ -79,27 +79,44 @@ reestr_coord['point'] = reestr_coord.apply(
     lambda row: np.nan if pd.isnull(row['x'])
     else _get_point(row['x'], row['y']), axis=1)
 
-plt.show()
+# plt.show()
 
 reestr.rename(columns={'Unnamed: 30': 'work_section'}, inplace=True)
 zones_dict = {name: i for i, name in enumerate(reestr['Unnamed: 31'].unique())}
 reestr['zone'] = reestr.apply(
     lambda row: zones_dict[row['Unnamed: 31']], axis=1)
-# reestr.sort_values(by=['y', 'x'], ascending=[0, 1], inplace=True)
+reestr.sort_values(by=['y', 'x'], ascending=[0, 1], inplace=True)
 reestr['graph'] = reestr[
     'Группировка (кластеризация) - построение графа (типа "лес" расстояние между вершинами (проявлениями) - не более 100м)']
 reestr['№ проявления'] = np.nan
 reestr['№ проявления в участке'] = np.nan
 
-X = reestr[~pd.isnull(reestr['graph'])]
-X.sort_values(by=['y', 'x'], ascending=[0, 1], inplace=True)
-for i, gr in enumerate(X['graph'].unique()):
-    reestr['№ проявления'][reestr['graph'] == gr] = i + 1
+num_gr = 1
+uniq = set()
+for row in reestr.iterrows():
+    gr = row[1]['graph']
+
+    if pd.isnull(gr):
+        reestr['№ проявления'].ix[row[0]] = num_gr
+        num_gr += 1
+
+    elif gr in uniq:
+        continue
+
+    else:
+        uniq.add(gr)
+        reestr['№ проявления'][reestr['graph'] == gr] = num_gr
+        num_gr += 1
+
+# X = reestr[~pd.isnull(reestr['graph'])]
+# X.sort_values(by=['y', 'x'], ascending=[0, 1], inplace=True)
+# for i, gr in enumerate(X['graph'].unique()):
+#     reestr['№ проявления'][reestr['graph'] == gr] = i + 1
 
 
-for section, section_groups in reestr.groupby('work_section'):
-    print('section -', section)
-    section_groups = section_groups[~pd.isnull(section_groups['graph'])]
-    section_groups.sort_values(by=['y', 'x'], ascending=[0, 1], inplace=True)
-    for i, gr in enumerate(section_groups['graph'].unique()):
-        reestr['№ проявления в участке'][reestr['graph'] == gr] = i + 1
+# for section, section_groups in reestr.groupby('work_section'):
+#     print('section -', section)
+#     section_groups = section_groups[~pd.isnull(section_groups['graph'])]
+#     section_groups.sort_values(by=['y', 'x'], ascending=[0, 1], inplace=True)
+#     for i, gr in enumerate(section_groups['graph'].unique()):
+#         reestr['№ проявления в участке'][reestr['graph'] == gr] = i + 1
