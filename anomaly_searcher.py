@@ -129,29 +129,3 @@ if __name__ == '__main__':
                                 ignore_index=True)
 
     concat_segments.to_csv('coords.csv', sep=';')
-
-    # draft_reestr = []
-    # for name, segments in segments_dict.items():
-    #     date = re.search(r'[0-9]{2}\.[0-9]{2}\.[0-9]{4}', name).group(0)
-    #     for k, segment in enumerate(segments):
-    #         min_val = np.fabs(segment['thickness'].min())
-    #         max_val = np.fabs(segment['thickness'].max())
-    #         draft_reestr.append([
-    #             segment['frame'].iloc[0],
-    #             segment['frame'].iloc[-1],
-    #             date, np.nan, 'прф',
-    #             np.nan, min_val, max_val,
-    #             max_val - min_val, np.median(segment['thickness']),
-    #             jumps_dict[name][k], np.nan,
-    #             name, 'gps, dat'
-    #         ])
-
-    # df_protocol = pd.DataFrame(draft_reestr,
-    #                            columns=[
-    #                                'frame_st', 'frame_end',
-    #                                'date', 'time', 'type',
-    #                                'Z', 'tk_min', 'tk_max',
-    #                                'amplitude', 'middle',
-    #                                'jumps', 'other',
-    #                                'file_name', 'file_source'
-    #                            ])
