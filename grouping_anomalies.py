@@ -108,15 +108,3 @@ for row in reestr.iterrows():
         reestr['№ проявления'][reestr['graph'] == gr] = num_gr
         num_gr += 1
 
-# X = reestr[~pd.isnull(reestr['graph'])]
-# X.sort_values(by=['y', 'x'], ascending=[0, 1], inplace=True)
-# for i, gr in enumerate(X['graph'].unique()):
-#     reestr['№ проявления'][reestr['graph'] == gr] = i + 1
-
-
-# for section, section_groups in reestr.groupby('work_section'):
-#     print('section -', section)
-#     section_groups = section_groups[~pd.isnull(section_groups['graph'])]
-#     section_groups.sort_values(by=['y', 'x'], ascending=[0, 1], inplace=True)
-#     for i, gr in enumerate(section_groups['graph'].unique()):
-#         reestr['№ проявления в участке'][reestr['graph'] == gr] = i + 1
