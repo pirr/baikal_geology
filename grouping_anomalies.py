@@ -108,3 +108,23 @@ for row in reestr.iterrows():
         reestr['№ проявления'][reestr['graph'] == gr] = num_gr
         num_gr += 1
 
+uniq = set()
+for section, section_group in reestr.groupby('work_section'):
+    num_gr = 1
+    print('section -', section)
+    # section_group = section_group[~pd.isnull(section_group['graph'])]
+    section_group.sort_values(by=['y', 'x'], ascending=[0, 1], inplace=True)
+    for row in section_group.iterrows():
+        gr = row[1]['graph']
+        if pd.isnull(gr):
+            reestr['№ проявления в участке'].ix[row[0]] = num_gr
+            num_gr += 1
+
+        elif gr in uniq:
+            continue
+
+        else:
+            uniq.add(gr)
+            reestr['№ проявления в участке'][reestr['graph'] == gr] = num_gr
+            num_gr += 1
+        # reestr['№ проявления в участке'][reestr['graph'] == gr] = i + 1
