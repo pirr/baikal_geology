@@ -72,7 +72,7 @@ def merge_segments(segments):
         else:
             r.pop(0)
 
-    return segments, jumps
+    return zip(segments, jumps)
 
 
 def join_coords(del_df, gps_df):
