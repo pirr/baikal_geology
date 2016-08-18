@@ -1,9 +1,7 @@
 import sys
-import os
 import numpy as np
 import pandas as pd
 from random import randint
-import re
 
 
 def get_deduct(group, startframe, endframe):
@@ -32,11 +30,6 @@ def get_segments(limit, amplitude, group):
         sys.stdout.write("\033[K")
         sys.stdout.write(
             '\r{}'.format('.' * randint(0, 9)))
-        # sys.stdout.write("\033[K")
-        # sys.stdout.write(
-        #     'process search segments... {3:6d}:{0:6d}/{1:6d} found:{2:3d} || {4}, {5:3d}\r'
-        #     .format(endframe, fin, len(segments),
-        #             startframe, start_anomaly, int(deduct)))
 
         if np.fabs(deduct) >= amplitude:
             if start_anomaly is not None:
@@ -61,8 +54,6 @@ def merge_segments(segments):
     r = list(range(1, len(segments)))
     jumps = [1] * len(segments)
     while r:
-        # sys.stdout.write("\033[K")
-        # sys.stdout.write('processing merging segments... {}\r'.format(len(r)))
         i = r[0]
         if segments[i - 1].iloc[-1]['frame'] + 1 == segments[i].iloc[0]['frame']:
             segments[i - 1] = pd.concat([segments[i - 1], segments.pop(i)])
@@ -81,51 +72,5 @@ def join_coords(del_df, gps_df):
     return del_df
 
 
-if __name__ == '__main__':
-    filegroups = dict()
-    uwb_logs_folder = 'testdata'
-    del_logs_files = (f for f in os.listdir(
-        uwb_logs_folder) if f[-3:] == 'del')
-    gps_logs_files = (f for f in os.listdir(
-        uwb_logs_folder) if f[-3:] == 'gps')
 
-    for f in del_logs_files:
-        del_log_df = pd.read_csv(os.path.join(uwb_logs_folder, f), sep=' ')
-        del_log_df = del_log_df.ix[:, 0:3]
-        del_log_df.columns = ['frame', 'min', 'max']
-        f = f[:-3]
-        del_log_df['filename'] = f
-        gps_f = ''.join([f, 'gps'])
-        del_log_df['min'] = del_log_df[
-            'min'].str.replace(',', '.').astype(float)
-        del_log_df['max'] = del_log_df[
-            'max'].str.replace(',', '.').astype(float)
-        del_log_df['thickness'] = del_log_df.apply(
-            lambda row: (row['max'] - row['min']) * 8.93561103810775, axis=1)
-        gps_log_df = pd.read_csv(os.path.join(uwb_logs_folder, gps_f), sep=' ')
-        gps_log_df = gps_log_df.ix[:, 0:3]
-        gps_log_df.columns = ['frame', 'x', 'y']
-        gps_log_df['x'] = gps_log_df['x'].str.replace(',', '.').astype(float)
-        gps_log_df['y'] = gps_log_df['y'].str.replace(',', '.').astype(float)
-        del_log_df = join_coords(del_log_df, gps_log_df)
-        del_log_df = del_log_df.dropna()
 
-        filegroups[gps_f] = del_log_df
-
-    segments_dict = dict()
-    jumps_dict = dict()
-    limit = 300
-    amplitude = 20
-    for name, group in filegroups.items():
-        sys.stdout.write(name + ':\n')
-        segments_dict[name] = get_segments(limit, amplitude, group[:3000])
-        segments_dict[name], jumps_dict[
-            name] = merge_segments(segments_dict[name])
-        sys.stdout.write("\033[K")
-        sys.stdout.write(' ' * 10 + 'found {} segments in {} frames\n'.format(
-            len(segments_dict[name]), len(group)))
-
-    concat_segments = pd.concat([pd.concat(s) for s in segments_dict.values() if s],
-                                ignore_index=True)
-
-    concat_segments.to_csv('coords.csv', sep=';')
