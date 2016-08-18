@@ -1,7 +1,10 @@
 import sys
+import ogr
 import numpy as np
 import pandas as pd
 from random import randint
+import json
+from sklearn.neighbors import DistanceMetric
 
 
 def get_deduct(group, startframe, endframe):
@@ -72,5 +75,15 @@ def join_coords(del_df, gps_df):
     return del_df
 
 
+def get_point(yx):
+    point = ogr.Geometry(ogr.wkbPoint)
+    return point.AddPoint(yx[0], yx[1])
 
 
+def near_point(geom_p1, geom_p2, common_name, max_near_dist=100, metric=6372795):
+    dist = geom_p1.Distance(geom_p2) / 57.29578 * metric
+    return common_name if dist <= max_near_dist else False
+
+
+def yx_from_geom(feature_geometry):
+    return json.loads(feature_geometry.ExportToJson())['coordinates'][::-1]
