@@ -3,6 +3,7 @@ import ogr
 import numpy as np
 import pandas as pd
 import json
+from sklearn.metrics import pairwise_distances
 from sklearn.neighbors import DistanceMetric
 
 
