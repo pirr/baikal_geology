@@ -15,27 +15,33 @@ from anomaly_searcher import (get_segments, merge_segments,
 
 
 def multy_get_data(uwb_logs_folder, f):
-    del_log_df = pd.read_csv(os.path.join(uwb_logs_folder, f), sep=' ')
-    del_log_df = del_log_df.ix[:, 0:3]
-    del_log_df.columns = ['frame', 'min', 'max']
-    f = f[:-4]
-    del_log_df['filename'] = f
-    gps_f = ''.join([f, '.gps'])
-    del_log_df['min'] = del_log_df['min'].astype(
-        str).str.replace(',', '.').astype(float)
-    del_log_df['max'] = del_log_df['max'].astype(
-        str).str.replace(',', '.').astype(float)
-    del_log_df['thickness'] = del_log_df.apply(
-        lambda row: round((row['max'] - row['min']) * 8.93561103810775, 0), axis=1)
-    gps_log_df = pd.read_csv(os.path.join(uwb_logs_folder, gps_f), sep=' ')
-    gps_log_df = gps_log_df.ix[:, 0:3]
-    gps_log_df.columns = ['frame', 'x', 'y']
-    gps_log_df['x'] = gps_log_df['x'].astype(
-        str).str.replace(',', '.').astype(float)
-    gps_log_df['y'] = gps_log_df['y'].astype(
-        str).str.replace(',', '.').astype(float)
-    del_log_df = join_coords(del_log_df, gps_log_df)
-    del_log_df = del_log_df.dropna()
+    filename = f[:-4]
+    gps_name = ''.join([filename, '.gps'])
+    gps_f = os.path.join(uwb_logs_folder, gps_name)
+
+    if os.path.exists(gps_f):
+        del_log_df = pd.read_csv(os.path.join(uwb_logs_folder, f), sep=' ')
+        del_log_df = del_log_df.ix[:, 0:3]
+        del_log_df.columns = ['frame', 'min', 'max']
+        del_log_df['filename'] = filename
+        del_log_df['min'] = del_log_df['min'].astype(
+            str).str.replace(',', '.').astype(float)
+        del_log_df['max'] = del_log_df['max'].astype(
+            str).str.replace(',', '.').astype(float)
+        del_log_df['thickness'] = del_log_df.apply(
+            lambda row: round((row['max'] - row['min']) * 8.93561103810775, 0), axis=1)
+        gps_log_df = pd.read_csv(gps_f, sep=' ')
+        gps_log_df = gps_log_df.ix[:, 0:3]
+        gps_log_df.columns = ['frame', 'x', 'y']
+        gps_log_df['x'] = gps_log_df['x'].astype(
+            str).str.replace(',', '.').astype(float)
+        gps_log_df['y'] = gps_log_df['y'].astype(
+            str).str.replace(',', '.').astype(float)
+        del_log_df = join_coords(del_log_df, gps_log_df)
+        del_log_df = del_log_df.dropna()
+
+    else:
+        return None
 
     return del_log_df[['frame', 'filename', 'thickness', 'x', 'y']]
 
