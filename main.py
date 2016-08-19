@@ -49,67 +49,92 @@ def multy_get_data(uwb_logs_folder, f):
 def multy_get_anomaly(filegroup, limit=300, amplitude=20):
     name = filegroup[0]
     group = filegroup[1]
+    sys.stdout.write('{} search anomalies\n'.format(name))
     anomaly_segments = get_segments(limit, amplitude, group)
     if not anomaly_segments:
+        sys.stdout.write('{} has not anomalies\n'.format(name))
         return None
-    segments = merge_segments(anomaly_segments)
-    return {'name': name, 'anomaly_segments': segments}
-
+    merge_segms = []
+    for segment in merge_segments(anomaly_segments):
+        segment[0][['Y', 'X']] = segment[0][['y', 'x']].apply(
+            lambda row: row / 57.29578).apply(pd.Series)
+        merge_segms.append(segment)
+    return {name: merge_segms}
 
 if __name__ == '__main__':
+    uwb_logs_folder = '!UWB_logs'
 
-    uwb_logs_folder = 'testdata'
     del_logs_files = (f for f in os.listdir(
         uwb_logs_folder) if f[-4:] == '.del')
+
     with Pool(5) as pool:
         data = pool.map(
             partial(multy_get_data, uwb_logs_folder), del_logs_files)
+        data = [d for d in data if d is not None]
         data = pd.concat(data)
         filegroups = data.groupby('filename')
         sys.stdout.write('\ndata prepared')
-        sys.stdout.write('\nsearch segments')
+        sys.stdout.write('\nsearch segments\n')
         anomaly_segments = pool.map(multy_get_anomaly, filegroups)
         anomaly_segments = [s for s in anomaly_segments if s is not None]
     sys.stdout.write('\nanomalys prepared')
 
-    if anomaly_segments:
-        anomalys_df = pd.concat(anomaly_segments[0]['anomaly_segments'][
-                                0], ignore_index=True)
-    else:
-        print('None anomalys')
-        sys.exit()
+    driver = ogr.GetDriverByName('ESRI Shapefile')
+    shp_file_stations = 'shp/Station_summer_2016.shp'
+    shp_file_detected_anomalies = 'shp/увеличенная_таблица.shp'
+    stations = driver.Open(shp_file_stations, 0)
+    daLayer_stats = stations.GetLayer(0)
 
-    for anomalys in anomaly_segments[1:]:
-        anomalys = pd.concat(anomalys['anomaly_segments'][0], ignore_index=True)
-        anomalys_df = pd.concat([anomalys_df, anomalys], ignore_index=True)
+    YX_stations = []
+    for feature in daLayer_stats:
+        YX_stations.append(yx_from_geom(feature))
+    YX_stations = np.array(YX_stations) / 57.29578
 
-    anomalys_df.to_csv('ice_anomalies_170816_1435.csv', sep=';')
+    anomalys_list = []
+    sgm_num = 1
+    for named_segments in anomaly_segments:
+        for name, segments in named_segments.items():
+            date = re.search(r'[0-9]{2}\.[0-9]{2}\.[0-9]{4}',
+                             name).group(0)
 
-    draft_reestr = []
-    for anomalys in anomaly_segments:
-        date = re.search(r'[0-9]{2}\.[0-9]{2}\.[0-9]{4}',
-                         anomalys['name']).group(0)
-        for segment in anomalys['anomaly_segments']:
-            min_val = np.fabs(segment[0]['thickness'].min())
-            max_val = np.fabs(segment[0]['thickness'].max())
-            draft_reestr.append([
-                segment[0]['frame'].iloc[0],
-                segment[0]['frame'].iloc[-1],
-                date, np.nan, 'прф',
-                np.nan, min_val, max_val,
-                max_val - min_val, np.median(segment[0]['thickness']),
-                segment[1], np.nan,
-                anomalys['name'], 'gps, dat'
-            ])
+            for segment in segments:
+                anomaly_dict = dict()
+                min_val = np.fabs(segment[0]['thickness'].min())
+                max_val = np.fabs(segment[0]['thickness'].max())
 
-    df_protocol = pd.DataFrame(draft_reestr,
-                               columns=[
-                                   'frame_st', 'frame_end',
-                                   'date', 'time', 'type',
-                                   'Z', 'tk_min', 'tk_max',
-                                   'amplitude', 'middle',
-                                   'jumps', 'other',
-                                   'file_name', 'file_source'
-                               ])
-    df_protocol.to_csv('protocol_170816_1630.csv', sep=';')
+                anomaly_dict['segment_num'] = sgm_num
+                anomaly_dict['file'] = name
+                anomaly_dict['x_start'] = segment[0]['x'].iloc[0]
+                anomaly_dict['y_start'] = segment[0]['y'].iloc[0]
+                anomaly_dict['x_end'] = segment[0]['x'].iloc[-1]
+                anomaly_dict['y_end'] = segment[0]['y'].iloc[-1]
+                anomaly_dict['frame_start'] = segment[0]['frame'].iloc[0]
+                anomaly_dict['frame_end'] = segment[0]['frame'].iloc[-1]
+                # anomaly_dict['segment'] = segment[0]
+                anomaly_dict['jumps'] = segment[1]
+
+                anomaly_dict['near_stations'] = []
+                anomaly_dict['len'] = 0
+                for chunk_XY_segment in get_chunk_segment(segment[0]):
+                    anomaly_dict['near_stations'].append(get_near_stations(chunk_XY_segment[['Y', 'X']],
+                                                                           YX_stations, daLayer_stats))
+                    anomaly_dict[
+                        'len'] += get_segment_len(chunk_XY_segment[['Y', 'X']])
+                anomaly_dict['near_stations'] = [
+                    ns for ns in anomaly_dict['near_stations'] if ns is not None]
+                if anomaly_dict['near_stations']:
+                    anomaly_dict['near_stations'] = ', '.join(
+                        str(s) for s in set.union(*anomaly_dict['near_stations']))
+                anomaly_dict['min'] = min_val
+                anomaly_dict['max'] = max_val
+                anomaly_dict['date'] = date
+                anomaly_dict['amplitude'] = max_val - min_val
+                anomaly_dict['median'] = np.median(segment[0]['thickness'])
+
+                sgm_num += 1
+
+                anomalys_list.append(anomaly_dict)
+
+    anomalys_df = pd.DataFrame(anomalys_list)
+    anomalys_df.to_csv('protocol_190816_1830.csv', sep=';')
     sys.stdout.write('\nDONE')
