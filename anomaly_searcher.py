@@ -82,5 +82,5 @@ def near_point(geom_p1, geom_p2, common_name, max_near_dist=100, metric=6372795)
     return common_name if dist <= max_near_dist else False
 
 
-def yx_from_geom(feature_geometry):
-    return json.loads(feature_geometry.ExportToJson())['coordinates'][::-1]
+def yx_from_geom(feature):
+    return json.loads(feature.geometry().ExportToJson())['coordinates'][::-1]
