@@ -82,3 +82,26 @@ def near_point(geom_p1, geom_p2, common_name, max_near_dist=100, metric=6372795)
 
 def yx_from_geom(feature):
     return json.loads(feature.geometry().ExportToJson())['coordinates'][::-1]
+
+
+def get_near_stations(YX_anomalies, YX_stations, daLayer_stats, field='STATION', max_dist_to_station=300):
+    D = pairwise_distances(YX_anomalies, YX_stations) * 6372795
+    args = np.argwhere((D == D.min()) & (D < 300))[:, 1]
+    stations = None
+    if args:
+        stations = {feature.GetField(field)
+                    for i, feature in enumerate(daLayer_stats) if i in args}
+
+    return stations
+
+
+def get_segment_len(YX_segment):
+    dist = DistanceMetric.get_metric(metric='haversine')
+    D = dist.pairwise(YX_segment)
+    segment_len = np.sum(D.diagonal(1) * 6372795)
+    return segment_len
+
+
+def get_chunk_segment(YX_segment, size=5000):
+    for i in range(0, len(YX_segment), size):
+        yield YX_segment.iloc[i:i + size]
