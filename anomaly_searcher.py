@@ -29,8 +29,6 @@ def get_segments(limit, amplitude, group):
     deduct = None
     for endframe in list(range(1, end)):
         deduct = get_deduct(group, startframe, endframe)
-        sys.stdout.write(
-
         if np.fabs(deduct) >= amplitude:
             if start_anomaly is not None:
                 if start_anomaly[0] / deduct < 0:
