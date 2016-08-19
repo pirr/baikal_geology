@@ -2,7 +2,6 @@ import sys
 import ogr
 import numpy as np
 import pandas as pd
-from random import randint
 import json
 from sklearn.neighbors import DistanceMetric
 
@@ -30,9 +29,7 @@ def get_segments(limit, amplitude, group):
     deduct = None
     for endframe in list(range(1, end)):
         deduct = get_deduct(group, startframe, endframe)
-        sys.stdout.write("\033[K")
         sys.stdout.write(
-            '\r{}'.format('.' * randint(0, 9)))
 
         if np.fabs(deduct) >= amplitude:
             if start_anomaly is not None:
