@@ -130,6 +130,8 @@ if __name__ == '__main__':
                 if anomaly_dict['near_stations']:
                     anomaly_dict['near_stations'] = ', '.join(
                         str(s) for s in set.union(*anomaly_dict['near_stations']))
+                else:
+                    anomaly_dict['near_stations'] = np.nan
                 anomaly_dict['min'] = min_val
                 anomaly_dict['max'] = max_val
                 anomaly_dict['date'] = date
@@ -141,6 +143,5 @@ if __name__ == '__main__':
                 anomalys_list.append(anomaly_dict)
 
     anomalys_df = pd.DataFrame(anomalys_list)
-    anomalys_df.to_csv('protocol_190816_1830.csv', sep=';')
-    sys.stdout.write('\nDONE')
+    anomalys_df.to_csv('protocol_220816_1500.csv', sep=';')
     sys.stdout.write('\nDONE in {}'.format(datetime.now() - start))
