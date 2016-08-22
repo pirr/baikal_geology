@@ -55,7 +55,7 @@ def multy_get_anomaly(filegroup, limit=300, amplitude=20):
     sys.stdout.write('{} search anomalies\n'.format(name))
     anomaly_segments = get_segments(limit, amplitude, group)
     if not anomaly_segments:
-        sys.stdout.write('{} has not anomalies\n'.format(name))
+        sys.stdout.write('{} no anomalies\n'.format(name))
         return None
     merge_segms = []
     for segment in merge_segments(anomaly_segments):
@@ -76,8 +76,7 @@ if __name__ == '__main__':
         data = [d for d in data if d is not None]
         data = pd.concat(data)
         filegroups = data.groupby('filename')
-        sys.stdout.write('\ndata prepared')
-        sys.stdout.write('\nsearch segments\n')
+        sys.stdout.write('data prepared/n')
         anomaly_segments = pool.map(multy_get_anomaly, filegroups)
         anomaly_segments = [s for s in anomaly_segments if s is not None]
     sys.stdout.write('\nanomalys prepared')
