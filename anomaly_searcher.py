@@ -85,15 +85,15 @@ def yx_from_geom(feature):
     return json.loads(feature.geometry().ExportToJson())['coordinates'][::-1]
 
 
-def get_near_stations(YX_anomalies, YX_stations, daLayer_stats, field='STATION', max_dist_to_station=300):
+def get_near_stations(YX_anomalies, YX_stations, station_dict, field='STATION', max_dist_to_station=300):
     D = pairwise_distances(YX_anomalies, YX_stations) * 6372795
     args = np.argwhere((D == D.min()) & (D < 300))[:, 1]
-    stations = None
-    if args:
-        stations = {feature.GetField(field)
-                    for i, feature in enumerate(daLayer_stats) if i in args}
+    near_stations = None
 
-    return stations
+    if args.size:
+        near_stations = {station_dict[i] for i in args}
+
+    return near_stations
 
 
 def get_segment_len(YX_segment):
