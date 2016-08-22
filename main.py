@@ -88,8 +88,10 @@ if __name__ == '__main__':
     daLayer_stats = stations.GetLayer(0)
 
     YX_stations = []
-    for feature in daLayer_stats:
+    station_dict = dict()
+    for i, feature in enumerate(daLayer_stats):
         YX_stations.append(yx_from_geom(feature))
+        station_dict[i] = feature.GetField('STATION')
     YX_stations = np.array(YX_stations) / 57.29578
 
     anomalys_list = []
