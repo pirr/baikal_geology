@@ -7,12 +7,15 @@ from multiprocessing import Pool
 import numpy as np
 import re
 from osgeo import ogr
+from datetime import datetime
 
 
 from anomaly_searcher import (get_segments, merge_segments,
                               join_coords, yx_from_geom, get_near_stations,
                               get_segment_len, get_chunk_segment)
 
+
+start = datetime.now()
 
 def multy_get_data(uwb_logs_folder, f):
     filename = f[:-4]
@@ -138,3 +141,4 @@ if __name__ == '__main__':
     anomalys_df = pd.DataFrame(anomalys_list)
     anomalys_df.to_csv('protocol_190816_1830.csv', sep=';')
     sys.stdout.write('\nDONE')
+    sys.stdout.write('\nDONE in {}'.format(datetime.now() - start))
