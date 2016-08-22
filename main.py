@@ -121,9 +121,10 @@ if __name__ == '__main__':
                 anomaly_dict['len'] = 0
                 for chunk_XY_segment in get_chunk_segment(segment[0]):
                     anomaly_dict['near_stations'].append(get_near_stations(chunk_XY_segment[['Y', 'X']],
-                                                                           YX_stations, daLayer_stats))
+                                                                           YX_stations, station_dict))
                     anomaly_dict[
                         'len'] += get_segment_len(chunk_XY_segment[['Y', 'X']])
+
                 anomaly_dict['near_stations'] = [
                     ns for ns in anomaly_dict['near_stations'] if ns is not None]
                 if anomaly_dict['near_stations']:
