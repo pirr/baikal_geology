@@ -82,8 +82,8 @@ if __name__ == '__main__':
     sys.stdout.write('\nanomalys prepared')
 
     driver = ogr.GetDriverByName('ESRI Shapefile')
-    shp_file_stations = 'shp/Station_summer_2016.shp'
-    shp_file_detected_anomalies = 'shp/увеличенная_таблица.shp'
+    shp_file_stations = 'gis/Station_summer_2016.shp'
+    shp_file_detected_anomalies = 'gis/увеличенная_таблица.shp'
     stations = driver.Open(shp_file_stations, 0)
     daLayer_stats = stations.GetLayer(0)
 
