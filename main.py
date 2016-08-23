@@ -94,6 +94,7 @@ if __name__ == '__main__':
         station_dict[i] = feature.GetField('STATION')
     YX_stations = np.array(YX_stations) / 57.29578
 
+    big_data_segments = pd.DataFrame()
     anomalys_list = []
     sgm_num = 1
     for named_segments in anomaly_segments:
@@ -137,11 +138,14 @@ if __name__ == '__main__':
                 anomaly_dict['date'] = date
                 anomaly_dict['amplitude'] = max_val - min_val
                 anomaly_dict['median'] = np.median(segment[0]['thickness'])
+                segment[0]['segment_num'] = sgm_num
+                big_data_segments = pd.concat([big_data_segments, segment[0]])
 
                 sgm_num += 1
 
                 anomalys_list.append(anomaly_dict)
 
+    big_data_segments.to_csv('big_data_test.csv', sep=';')
     anomalys_df = pd.DataFrame(anomalys_list)
-    anomalys_df.to_csv('protocol_220816_1500.csv', sep=';')
+    anomalys_df.to_csv('protocol_test.csv', sep=';')
     sys.stdout.write('\nDONE in {}'.format(datetime.now() - start))
