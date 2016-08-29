@@ -97,7 +97,7 @@ def yx_from_geom(feature):
 
 def get_near_stations(YX_anomalies, YX_stations, station_dict, field='STATION', max_dist_to_station=300):
     D = pairwise_distances(YX_anomalies, YX_stations) * 6372795
-    args = np.argwhere((D == D.min()) & (D < 300))[:, 1]
+    args = np.argwhere((D == D.min()) & (D < max_dist_to_station))[:, 1]
     near_stations = None
 
     if args.size:
