@@ -5,13 +5,13 @@ import pandas as pd
 import json
 from sklearn.metrics import pairwise_distances
 from sklearn.neighbors import DistanceMetric
+from scipy.ndimage.interpolation import shift
 
 
 def get_deduct(group, startframe, endframe):
-    deduct = 0
-    for k in range(startframe, endframe):
-        deduct += (group['thickness'].iloc[k] -
-                   group['thickness'].iloc[k - 1])
+    M1 = group['thickness'].iloc[startframe: endframe]
+    M2 = shift(M1, -1, cval=np.nan)
+    deduct = (M2[:-1] - M1[:-1]).sum()
     return deduct
 
 
