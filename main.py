@@ -49,7 +49,7 @@ def multy_get_data(uwb_logs_folder, f):
     return del_log_df[['frame', 'filename', 'thickness', 'x', 'y']]
 
 
-def multy_get_anomaly(filegroup, limit=300, amplitude=20):
+def multy_get_anomaly(filegroup, limit=500, amplitude=20):
     name = filegroup[0]
     group = filegroup[1]
     sys.stdout.write('{} search anomalies\n'.format(name))
