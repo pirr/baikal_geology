@@ -8,6 +8,7 @@ import numpy as np
 import re
 from osgeo import ogr
 from datetime import datetime
+import matplotlib.pyplot as plt
 
 
 from anomaly_searcher import (get_segments, merge_segments,
@@ -144,7 +145,13 @@ if __name__ == '__main__':
                 sgm_num += 1
 
                 anomalys_list.append(anomaly_dict)
-
+    
+    for name, group in big_data_segments.groupby('segment_num'):
+        group['thickness'] = group['thickness'] * -1
+        ax = group.plot(x=['frame'], y=['thickness'], title=str(name) + ' ' + group.iloc[0]['filename'])
+        fig = ax.get_figure()
+        fig.savefig('figs_test/' + str(name) + '.png')
+        
     big_data_segments.to_csv('big_data_test.csv', sep=';')
     anomalys_df = pd.DataFrame(anomalys_list)
     anomalys_df.to_csv('protocol_test.csv', sep=';')
