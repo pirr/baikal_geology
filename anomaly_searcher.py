@@ -5,13 +5,13 @@ import pandas as pd
 import json
 from sklearn.metrics import pairwise_distances
 from sklearn.neighbors import DistanceMetric
+from scipy.ndimage.interpolation import shift
 
 
 def get_deduct(group, startframe, endframe):
-    deduct = 0
-    for k in range(startframe, endframe):
-        deduct += (group['thickness'].iloc[k] -
-                   group['thickness'].iloc[k - 1])
+    M1 = group['thickness'].iloc[startframe: endframe]
+    M2 = shift(M1, -1, cval=np.nan)
+    deduct = (M2[:-1] - M1[:-1]).sum()
     return deduct
 
 
@@ -26,26 +26,36 @@ def get_segments(limit, amplitude, group):
     fin = end - 1
     segments = []
     startframe = 0
+    previous_deduct = 0
     start_anomaly = None
     deduct = None
     for endframe in list(range(1, end)):
         deduct = get_deduct(group, startframe, endframe)
-        if np.fabs(deduct) >= amplitude:
-            if start_anomaly is not None:
-                if start_anomaly[0] / deduct < 0:
-                    segments.append(group.iloc[start_anomaly[1]:endframe])
-                    start_anomaly = None
-                    startframe = endframe
-            else:
+        
+        if start_anomaly is None:
+            if deduct <= amplitude * -1:
                 start_anomaly = [deduct, startframe]
-
+                startframe = endframe
+            elif previous_deduct < deduct:
+                startframe = endframe
+            elif (endframe - startframe) > limit:
+                startframe = endframe
         elif endframe is fin:
             if max_amplitude(group, startframe, endframe) >= amplitude:
                 segments.append(group.iloc[startframe:endframe])
+        
+        else:
+            if deduct >= amplitude:
+                segments.append(group.iloc[start_anomaly[1]:endframe])
+                start_anomaly = None
+                startframe = endframe
+            elif start_anomaly[0] >= deduct: 
+                start_anomaly = [deduct, startframe]
+            elif (endframe - startframe) > limit:
+                startframe = endframe
 
-        if (endframe - startframe) > limit:
-            startframe = endframe
-
+        previous_deduct = deduct                        
+        
     return segments
 
 
@@ -87,7 +97,7 @@ def yx_from_geom(feature):
 
 def get_near_stations(YX_anomalies, YX_stations, station_dict, field='STATION', max_dist_to_station=300):
     D = pairwise_distances(YX_anomalies, YX_stations) * 6372795
-    args = np.argwhere((D == D.min()) & (D < 300))[:, 1]
+    args = np.argwhere((D == D.min()) & (D < max_dist_to_station))[:, 1]
     near_stations = None
 
     if args.size:
