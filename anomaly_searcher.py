@@ -94,14 +94,16 @@ def yx_from_geom(feature):
     return json.loads(feature.geometry().ExportToJson())['coordinates'][::-1]
 
 
-def get_near_stations(YX_anomalies, YX_stations, station_dict, field='STATION', max_dist_to_station=300):
-    D = pairwise_distances(YX_anomalies, YX_stations) * 6372795
-    args = np.argwhere((D == D.min()) & (D < max_dist_to_station))[:, 1]
-    near_stations = None
+def get_near(YX1, YX2, max_dist=100):
+    D = pairwise_distances(YX1, YX2) * 6372795
+    args = np.argwhere((D == D.min()) & (D < max_dist))[:, 1]
+    return args
 
+def get_near_stations(YX_anomalies, YX_stations, station_dict, max_dist_to_station=300):
+    args = get_near(YX_anomalies, YX_stations, max_dist_to_station)    
+    near_stations = None
     if args.size:
         near_stations = {station_dict[i] for i in args}
-
     return near_stations
 
 
