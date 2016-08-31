@@ -1,4 +1,3 @@
-import sys
 import ogr
 import numpy as np
 import pandas as pd
