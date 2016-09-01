@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+'''
+Input: grouping_anomalies clusteriz file, 
+       ice_anomalies files (ice_for_import, big_data) after main.py,
+       logger.xlsx - file with coordinates and time
+Output: ice_protocol, reestr_with_ice
+'''
 
 import numpy as np
 import pandas as pd
