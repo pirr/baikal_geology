@@ -35,17 +35,44 @@ for ice_segm_num, anomalies_num in ice_nearanomaly_dist_dict.items():
     anomaly_gr = reestr_data.loc[anomalies_num, '№ проявления УВ (после кластеризации)  ']
     ice_for_import.loc[ice_for_import['segment_num']==ice_segm_num, 'anomaly_num'] = ','.join([str(x) for x in anomaly_gr])
 
-ice_protocol['time'] = np.nan
+ice_for_import['time'] = np.nan
+ice_for_import['middle_x'] = np.nan
+ice_for_import['middle_y'] = np.nan
 temp = pd.DatetimeIndex(gps_log_data['date'])
 gps_log_data['Date'] = temp.date
 gps_log_data['Time'] = temp.time
-del gps_log_data['DateTime']
 for ice_segm_num, gps_log_row_num in ice_near_gps_log_dict.items():
-    time = gps_log_data.loc[gps_log_row_num, 'Time'].values
-    ice_protocol.loc[ice_protocol['segment_num']==ice_segm_num, 'time'] = time
+    time = gps_log_data.loc[gps_log_row_num[0], 'Time'].values
+    time_middle_coord = (time, gps_log_row_num[1], gps_log_row_num[2])
+    ice_for_import.loc[ice_for_import['segment_num']==ice_segm_num, 'time':'middle_y'] = time_middle_coord
 
-ice_protocol.to_csv('ice_for_import.csv', sep=';')
-    
+ice_for_import.sort_values(by=['date', 'time'], inplace=True)
+ice_for_import.reset_index(inplace=True)
+ice_for_import['n'] = np.nan
+ice_for_import['num'] = np.nan
+for index, row in ice_for_import.iterrows():
+    n = str(index+1)
+    num = '-'.join([protocol_num, n])
+    ice_for_import.loc[index, 'n':'num'] = n, num
+
+anom_prot_num_df = ice_for_import[['anomaly_num', 'n']].dropna()
+anom_prot_num_df = anom_prot_num_df.apply(pd.to_numeric)
+group_anom_prot_num = anom_prot_num_df.groupby('anomaly_num')
+
+for anom_num, row in group_anom_prot_num:
+    n = ','.join(str(x) for x in list(row['n']))
+    ledomer_protocol = '-'.join([protocol_num, n])
+    ledomer_reestr = reestr_data.loc[reestr_data['№ проявления УВ (после кластеризации)  ']==anom_num, 'Unnamed: 42'].iloc[0]
+    if pd.isnull(ledomer_reestr):
+        new_ledomer = ledomer_protocol
+    else:
+        new_ledomer = ', '.join([ledomer_reestr, ledomer_protocol])
+    reestr_data.loc[reestr_data['№ проявления УВ (после кластеризации)  ']==anom_num, 'Unnamed: 42'] = new_ledomer
+
+ice_for_import.to_csv(protocol_num+'_ice_protocol.csv', sep=';')
+reestr_data.to_csv(protocol_num+'_reestr_with_ice.csv', sep=';')
+
+   
 
     
     
