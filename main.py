@@ -116,7 +116,6 @@ if __name__ == '__main__':
                 anomaly_dict['y_end'] = segment[0]['y'].iloc[-1]
                 anomaly_dict['frame_start'] = segment[0]['frame'].iloc[0]
                 anomaly_dict['frame_end'] = segment[0]['frame'].iloc[-1]
-                # anomaly_dict['segment'] = segment[0]
                 anomaly_dict['jumps'] = segment[1]
 
                 anomaly_dict['near_stations'] = []
@@ -151,8 +150,8 @@ if __name__ == '__main__':
         ax = group.plot(x=['frame'], y=['thickness'], title=str(name) + ' ' + group.iloc[0]['filename'])
         fig = ax.get_figure()
         fig.savefig('figs_test/' + str(name) + '.png')
-        
-    big_data_segments.to_csv('big_data_test.csv', sep=';')
+    
     anomalys_df = pd.DataFrame(anomalys_list)
-    anomalys_df.to_csv('protocol_test.csv', sep=';')
+    anomalys_df.to_csv('ice_for_import.csv', sep=';')
+    big_data_segments.to_csv('big_data_test.csv', sep=';')
     sys.stdout.write('\nDONE in {}'.format(datetime.now() - start))
