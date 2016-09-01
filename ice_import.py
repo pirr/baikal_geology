@@ -29,10 +29,11 @@ for name, items in groups:
     if args_midd.size:
         ice_near_gps_log_dict[name] = (args_midd, middle_coord[0][1]*57.29578, middle_coord[0][0]*57.29578)
 
+ice_for_import['anomaly_num'] = np.nan
 
 for ice_segm_num, anomalies_num in ice_nearanomaly_dist_dict.items():
     anomaly_gr = reestr_data.loc[anomalies_num, '№ проявления УВ (после кластеризации)  ']
-    ice_protocol.loc[ice_protocol['segment_num']==ice_segm_num, 'anomaly_num'] = ','.join([str(x) for x in anomaly_gr])
+    ice_for_import.loc[ice_for_import['segment_num']==ice_segm_num, 'anomaly_num'] = ','.join([str(x) for x in anomaly_gr])
 
 ice_protocol['time'] = np.nan
 temp = pd.DatetimeIndex(gps_log_data['date'])
