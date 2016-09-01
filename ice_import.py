@@ -27,9 +27,7 @@ for name, items in groups:
     middle_coord = yx_ice_gr[int(len(yx_ice_gr)/2)].reshape(1,-1)
     args_midd = get_near(middle_coord, yx_gps_log, 110)
     if args_midd.size:
-        ice_near_gps_log_dict[name] = args_midd
-
-ice_protocol['anomaly_num'] = np.nan
+        ice_near_gps_log_dict[name] = (args_midd, middle_coord[0][1]*57.29578, middle_coord[0][0]*57.29578)
 
 
 for ice_segm_num, anomalies_num in ice_nearanomaly_dist_dict.items():
