@@ -35,8 +35,8 @@ def get_segments(limit, amplitude, group):
             if deduct <= amplitude * -1:
                 start_anomaly = [deduct, startframe]
                 startframe = endframe
-            elif previous_deduct < deduct:
-                startframe = endframe
+#            elif previous_deduct < deduct:
+#                startframe = endframe
             elif (endframe - startframe) > limit:
                 startframe = endframe
         elif endframe is fin:

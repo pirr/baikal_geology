@@ -15,7 +15,7 @@ def _get_point(x, y):
 
 distm = DistanceMetric.get_metric(metric='haversine')
 
-df = pd.read_excel('d:\work\BAIKAL\Geology\каталог\\3008 Реестр проявлений углеводородов.xlsx', 
+df = pd.read_excel('d:\work\BAIKAL\Geology\каталог\\0209 Реестр проявлений углеводородов.xlsx', 
                    sheetname='реестр', skiprows=2)
 cols = [c for c in df.columns[:11]]
 cols.extend(df.columns[19:])
@@ -107,7 +107,7 @@ for dis in dists:
             reestr[gr_col_name][reestr['graph'] == gr] = num_gr
             num_gr += 1
 
-reestr.to_csv('3108clusteriz_100.csv', sep=';')
+reestr.to_csv('0209clusteriz_100.csv', sep=';')
 #plt.show()
 #reestr.rename(columns={'Unnamed: 30': 'work_section'}, inplace=True)
 #zones_dict = {name: i for i, name in enumerate(reestr['Unnamed: 31'].unique())}

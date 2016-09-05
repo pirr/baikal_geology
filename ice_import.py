@@ -13,8 +13,8 @@ from anomaly_searcher import get_near
 protocol_num = '2016-0-L'
 
 ice_data = pd.read_csv('big_data_290816.csv', sep=';')
-ice_for_import = pd.read_csv('protocol_290816.csv', sep=';')
-reestr_data = pd.read_csv('3108clusteriz_100.csv', sep=';', encoding='cp1251')
+ice_for_import = pd.read_csv('ice_for_import.csv', sep=';')
+reestr_data = pd.read_csv('0209clusteriz_100.csv', sep=';', encoding='cp1251')
 gps_log_data = pd.read_excel('logger.xlsx')
 
 yx_reestr = reestr_data[['y', 'x']].as_matrix() / 57.29578
