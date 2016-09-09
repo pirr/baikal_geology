@@ -12,7 +12,7 @@ from anomaly_searcher import get_near
 
 protocol_num = '2016-0-L'
 
-ice_data = pd.read_csv('big_data_290816.csv', sep=';')
+ice_data = pd.read_csv('big_data_050916.csv', sep=';')
 ice_for_import = pd.read_csv('ice_for_import.csv', sep=';')
 reestr_data = pd.read_csv('0209clusteriz_100.csv', sep=';', encoding='cp1251')
 gps_log_data = pd.read_excel('logger.xlsx')
@@ -75,8 +75,8 @@ for anom_num, row in group_anom_prot_num:
         new_ledomer = ', '.join([ledomer_reestr, ledomer_protocol])
     reestr_data.loc[reestr_data['№ проявления УВ (после кластеризации)  ']==anom_num, 'Unnamed: 42'] = new_ledomer
 
-ice_for_import.to_csv(protocol_num+'_ice_protocol.csv', sep=';')
-reestr_data.to_csv(protocol_num+'_reestr_with_ice.csv', sep=';')
+ice_for_import.to_csv(protocol_num+'_ice_protocol_test.csv', sep=';')
+reestr_data.to_csv(protocol_num+'_reestr_with_ice_test.csv', sep=';')
 
    
 
