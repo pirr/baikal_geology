@@ -15,7 +15,7 @@ def _get_point(x, y):
 
 distm = DistanceMetric.get_metric(metric='haversine')
 
-df = pd.read_excel('d:\work\BAIKAL\Geology\каталог\\0209 Реестр проявлений углеводородов.xlsx', 
+df = pd.read_excel('d:\work\BAIKAL\Geology\каталог\\0909 Реестр проявлений углеводородов.xlsx', 
                    sheetname='реестр', skiprows=2)
 cols = [c for c in df.columns[:11]]
 cols.extend(df.columns[19:])
@@ -29,9 +29,14 @@ for i in range(len(D)):
     D[i, :i + 1] = np.nan
 
 r = D * 6372795
-dists = [100]
+dists = [30, 100, 300, 500, 1000, 1500, 2000, 2500, 3000]
+num = reestr['№ проявления УВ (после кластеризации)  '].max()
+new_nummeration = False
+if pd.isnull(num):
+    new_nummeration = True
 
 for dis in dists:
+    
     rx = np.where(r <= dis, r, np.NAN)
     true_indexes = np.argwhere(~np.isnan(rx))
 #    dist = rx[~np.isnan(rx)]
@@ -40,7 +45,8 @@ for dis in dists:
     
     G = nx.Graph()
     G.add_nodes_from(nodes)
-    G.add_edges_from(true_indexes)
+    for index in true_indexes:
+        G.add_edge(*index, weight=rx[true_indexes[0], true_indexes[1]])
     T = G.copy()
     B = G.copy()
     triangles = [x for x, v in nx.triangles(G).items() if v > 0]
@@ -49,65 +55,74 @@ for dis in dists:
     B.remove_nodes_from(triangles)
     
     colors = ['w', 'r', 'y']
-    names = ['cluster', 'binaries', 'triangles']
+    names = ['binaries', 'triangles', 'cluster']
     names = [n+str(dis) for n in names]
     
-    for k, g in enumerate([G, B, T]):
+    for k, g in enumerate([B, T, G]):
+        if new_nummeration:
+            num = 1
     
         xy_nodes = coords[g.nodes(), ::-1]
         pos = {n: p for n, p in zip(g.nodes(), xy_nodes)}
     
         d = nx.degree(g)
-#        nx.draw(g, pos=pos, edge_vmax=1,
-#                node_color=colors[k],
-#                edge_color=colors[k],
-#                node_size=[v * 100 for v in d.values()])
-#        nx.draw_networkx_labels(g, pos, font_size=10, font_family='sans-serif')
+        nx.draw(g, pos=pos, edge_vmax=1,
+                node_color=colors[k],
+                edge_color=colors[k],
+                node_size=[v * 100 for v in d.values()])
+        nx.draw_networkx_labels(g, pos, font_size=10, font_family='sans-serif')
     
         groups = list(nx.connected_components(g))
         groups_dict = {}
         for item in groups:
             i = sorted(list(item))[0]
-            num = reestr['№ проявления УВ (после кластеризации)  '].iloc[i]
-            if pd.isnull(num):
-                num = reestr['№ проявления УВ (после кластеризации)  '].max() + 1
-            groups_dict[num] = item
+            _num = reestr['№ проявления УВ (после кластеризации)  '].iloc[i]
+            if pd.isnull(_num):
+                _num = num
+                num += 1
+            groups_dict[_num] = item
         res = []
         reestr[names[k]] = np.nan
     
-        for num, indexes in groups_dict.items():
-            reestr[names[k]].iloc[list(indexes)] = num
+        for _num, indexes in groups_dict.items():
+            reestr[names[k]].iloc[list(indexes)] = _num
+    
+#    for k, clique in nx.find_cliques(G):
+        
+#    max_conn_nodes = max(k_components.keys())
+#    for k_gr in :
+        
     
 #        plt.ticklabel_format(style='plain', axis='both', useOffset=False)
     
-    reestr.sort_values(by=['y', 'x'], ascending=[0, 1], inplace=True)
-    reestr_coord = reestr[~pd.isnull(reestr['x'])][['x', 'y']]
-    reestr_coord['point'] = reestr_coord.apply(
-        lambda row: np.nan if pd.isnull(row['x'])
-        else _get_point(row['x'], row['y']), axis=1)
+#    reestr.sort_values(by=['y', 'x'], ascending=[0, 1], inplace=True)
+#    reestr_coord = reestr[~pd.isnull(reestr['x'])][['x', 'y']]
+#    reestr_coord['point'] = reestr_coord.apply(
+#        lambda row: np.nan if pd.isnull(row['x'])
+#        else _get_point(row['x'], row['y']), axis=1)
 #plt.savefig('cluster.pdf', orientation='album')
-    reestr['graph'] = reestr[
-    'Группировка (кластеризация) - построение графа (типа "лес" расстояние между вершинами (проявлениями) - не более 100м)']
-    gr_col_name = '№ проявления' + str(dis)
-    reestr[gr_col_name] = np.nan
-    num_gr = 1
-    uniq = set()
-    for row in reestr.iterrows():
-        gr = row[1]['graph']
-    
-        if pd.isnull(gr):
-            reestr[gr_col_name].ix[row[0]] = num_gr
-            num_gr += 1
-    
-        elif gr in uniq:
-            continue
-    
-        else:
-            uniq.add(gr)
-            reestr[gr_col_name][reestr['graph'] == gr] = num_gr
-            num_gr += 1
+#    reestr['graph'] = reestr[
+#    'Группировка (кластеризация) - построение графа (типа "лес" расстояние между вершинами (проявлениями) - не более 100м)']
+#    gr_col_name = '№ проявления' + str(dis)
+#    reestr[gr_col_name] = np.nan
+#    num_gr = 1
+#    uniq = set()
+#    for row in reestr.iterrows():
+#        gr = row[1]['graph']
+#    
+#        if pd.isnull(gr):
+#            reestr[gr_col_name].ix[row[0]] = num_gr
+#            num_gr += 1
+#    
+#        elif gr in uniq:
+#            continue
+#    
+#        else:
+#            uniq.add(gr)
+#            reestr[gr_col_name][reestr['graph'] == gr] = num_gr
+#            num_gr += 1
 
-reestr.to_csv('0209clusteriz_100.csv', sep=';')
+reestr.to_csv('0909clusteriz_30-3000.csv', sep=';')
 #plt.show()
 #reestr.rename(columns={'Unnamed: 30': 'work_section'}, inplace=True)
 #zones_dict = {name: i for i, name in enumerate(reestr['Unnamed: 31'].unique())}
