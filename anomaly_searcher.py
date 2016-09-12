@@ -1,11 +1,12 @@
 import ogr
 import numpy as np
+import networkx as nx
 import pandas as pd
 import json
 from sklearn.metrics import pairwise_distances
 from sklearn.neighbors import DistanceMetric
 from scipy.ndimage.interpolation import shift
-
+from itertools import combinations
 
 def get_deduct(group, startframe, endframe):
     M1 = group['thickness'].iloc[startframe: endframe]
@@ -117,3 +118,55 @@ def get_segment_len(YX_segment):
 def get_chunk_segment(YX_segment, size=5000):
     for i in range(0, len(YX_segment), size):
         yield YX_segment.iloc[i:i + size]
+
+def get_min_weight_max_cliques(G_with_weight):
+    max_weight_cliques = set()
+    min_weight_cliques = set()    
+    weight_dict = {}
+    cliques = sorted(list(nx.find_cliques(G_with_weight)), key=len)[::-1]
+    clique_combos = list(combinations(cliques, 2))
+    
+    
+    for i, clique in enumerate(cliques):
+        combos = combinations(sorted(clique), 2)
+        weight_dict[i] = sum(G_with_weight[c[0]][c[1]]['weight'] for c in combos)    
+    
+    for clique_comb in clique_combos:
+        i_1 = cliques.index(clique_comb[0])
+        i_2 = cliques.index(clique_comb[1])
+        
+        if not {i_1, i_2} & max_weight_cliques:
+            u = set(clique_comb[0]) & set(clique_comb[1])
+            if u:
+                if len(clique_comb[0]) == len(clique_comb[1]):
+                    p1 = weight_dict[i_1]
+                    p2 = weight_dict[i_2]
+                    if p1 <= p2:
+                        max_weight_cliques.add(i_2)
+                        min_weight_cliques.add(i_1)
+                    else:
+                        max_weight_cliques.add(i_1)
+                        min_weight_cliques.add(i_2)
+                
+                elif len(clique_comb[0]) > len(clique_comb[1]):
+                    max_weight_cliques.add(i_2)
+                    min_weight_cliques.add(i_1)
+                
+                else:
+                    max_weight_cliques.add(i_1)
+                    min_weight_cliques.add(i_2)
+            
+            else:
+                min_weight_cliques.add(i_1)
+                min_weight_cliques.add(i_2)
+        
+        elif i_1 in max_weight_cliques and i_2 not in max_weight_cliques:
+            min_weight_cliques.add(i_2)
+        
+        elif i_2 in max_weight_cliques and i_1 not in max_weight_cliques:
+            min_weight_cliques.add(i_1)
+    
+    min_weight_max_cliques_index = min_weight_cliques - max_weight_cliques
+    min_weight_max_cliques = [x for i, x in enumerate(cliques) if i in min_weight_max_cliques_index]
+            
+    return min_weight_max_cliques
