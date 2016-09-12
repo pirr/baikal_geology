@@ -59,12 +59,12 @@ for dis in dists:
         xy_nodes = coords[g.nodes(), ::-1]
         pos = {n: p for n, p in zip(g.nodes(), xy_nodes)}
     
-        d = nx.degree(g)
-        nx.draw(g, pos=pos, edge_vmax=1,
-                node_color=colors[k],
-                edge_color=colors[k],
-                node_size=[v * 100 for v in d.values()])
-        nx.draw_networkx_labels(g, pos, font_size=10, font_family='sans-serif')
+#        d = nx.degree(g)
+#        nx.draw(g, pos=pos, edge_vmax=1,
+#                node_color=colors[k],
+#                edge_color=colors[k],
+#                node_size=[v * 100 for v in d.values()])
+#        nx.draw_networkx_labels(g, pos, font_size=10, font_family='sans-serif')
     
         reestr[names[k]] = np.nan
     
