@@ -5,6 +5,7 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 from osgeo import ogr
+from anomaly_searcher import get_min_weight_max_cliques
 # from matplotlib.ticker import ScalarFormatter
 
 
@@ -72,4 +73,13 @@ for dis in dists:
             reestr[names[k]].iloc[list(indexes)] = num
             num += 1
     
+    num = 1
+    max_clique_name = 'max_clique' + str(dis)
+    reestr[max_clique_name] = np.nan
+    min_weight_max_cliques = get_min_weight_max_cliques(G)
+    for clique in min_weight_max_cliques:
+        reestr[max_clique_name].iloc[clique] = num
+        num += 1
 
+reestr.sort_values(by=['№ проявления УВ (после кластеризации)  '], inplace=True)
+reestr.to_csv('1209clusteriz_30-3000.csv', sep=';')
