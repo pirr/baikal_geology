@@ -15,11 +15,11 @@ def _get_point(x, y):
 
 distm = DistanceMetric.get_metric(metric='haversine')
 
-df = pd.read_excel('d:\work\BAIKAL\Geology\каталог\\0909 Реестр проявлений углеводородов.xlsx', 
+df = pd.read_excel('d:\work\BAIKAL\Geology\каталог\\1209 Реестр проявлений углеводородов.xlsx', 
                    sheetname='реестр', skiprows=2)
-cols = [c for c in df.columns[:11]]
+cols = [c for c in df.columns[:12]]
 cols.extend(df.columns[19:])
-reestr = df[11:][cols]
+reestr = df[14:][cols]
 
 coords = reestr[['y', 'x']].as_matrix()
 yx = coords / 57.29578
@@ -29,24 +29,19 @@ for i in range(len(D)):
     D[i, :i + 1] = np.nan
 
 r = D * 6372795
-dists = [30, 100, 300, 500, 1000, 1500, 2000, 2500, 3000]
-num = reestr['№ проявления УВ (после кластеризации)  '].max()
-new_nummeration = False
-if pd.isnull(num):
-    new_nummeration = True
+dists = [50, 100]
 
 for dis in dists:
     
     rx = np.where(r <= dis, r, np.NAN)
     true_indexes = np.argwhere(~np.isnan(rx))
-#    dist = rx[~np.isnan(rx)]
     
     nodes = np.union1d(true_indexes[:, 0], true_indexes[:, 1])
     
     G = nx.Graph()
     G.add_nodes_from(nodes)
     for index in true_indexes:
-        G.add_edge(*index, weight=rx[true_indexes[0], true_indexes[1]])
+        G.add_edge(*index, weight=rx[index[0], index[1]])
     T = G.copy()
     B = G.copy()
     triangles = [x for x, v in nx.triangles(G).items() if v > 0]
