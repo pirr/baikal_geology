@@ -53,9 +53,8 @@ for dis in dists:
     names = ['binaries', 'triangles', 'cluster']
     names = [n+str(dis) for n in names]
     
-    for k, g in enumerate([B, T, G]):
-        if new_nummeration:
-            num = 1
+    for k, g in enumerate([B, T]):
+        num = 1
     
         xy_nodes = coords[g.nodes(), ::-1]
         pos = {n: p for n, p in zip(g.nodes(), xy_nodes)}
@@ -81,6 +80,9 @@ for dis in dists:
     
         for _num, indexes in groups_dict.items():
             reestr[names[k]].iloc[list(indexes)] = _num
+        for indexes in nx.connected_components(g):
+            reestr[names[k]].iloc[list(indexes)] = num
+            num += 1
     
 #    for k, clique in nx.find_cliques(G):
         
