@@ -139,9 +139,7 @@ def get_min_weight_max_cliques(G_with_weight):
             u = set(clique_comb[0]) & set(clique_comb[1])
             if u:
                 if len(clique_comb[0]) == len(clique_comb[1]):
-                    p1 = weight_dict[i_1]
-                    p2 = weight_dict[i_2]
-                    if p1 <= p2:
+                    if weight_dict[i_1] <= weight_dict[i_2]:
                         max_weight_cliques.add(i_2)
                         min_weight_cliques.add(i_1)
                     else:
