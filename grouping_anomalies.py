@@ -15,14 +15,20 @@ def _get_point(x, y):
     return point
 
 distm = DistanceMetric.get_metric(metric='haversine')
+#reestr = pd.read_excel('d:\work\BAIKAL\Geology\каталог\\1010Каталог проявлений УВ_раб.xls', 
+#                   sheetname='реестр', header=19)
+#df = pd.read_excel('d:\work\BAIKAL\Geology\каталог\\1309 Реестр проявлений углеводородов.xlsx', 
+#                   sheetname='реестр', skiprows=2)
+#cols = [c for c in df.columns[:12]]
+#cols.extend(df.columns[19:])
+#reestr = df[14:][cols]
+#reestr.sort_values(by=['y', 'x'], ascending=[0, 1], inplace=True)
+#reestr = reestr[reestr['Физические проявления в водной среде (толща, поверхн.)']=='пропарина']
 
-df = pd.read_excel('d:\work\BAIKAL\Geology\каталог\\1209 Реестр проявлений углеводородов.xlsx', 
-                   sheetname='реестр', skiprows=2)
-cols = [c for c in df.columns[:12]]
-cols.extend(df.columns[19:])
-reestr = df[14:][cols]
+reestr = pd.read_csv('d:\\Smaga\\bitbucket\\datascience\\baikal_geology\\prop_for_clusters.csv', sep=';', encoding='utf8')
+reestr = reestr[reestr['zaverka_20'] != 'не подтвердилась в результате наблюдений в 2016 году']
 
-coords = reestr[['y', 'x']].as_matrix()
+coords = reestr[['Y', 'X']].as_matrix()
 yx = coords / 57.29578
 D = distm.pairwise(yx)
 
@@ -30,7 +36,7 @@ for i in range(len(D)):
     D[i, :i + 1] = np.nan
 
 r = D * 6372795
-dists = [50, 100]
+dists = [2000,]
 
 for dis in dists:
     
@@ -51,11 +57,12 @@ for dis in dists:
     B.remove_nodes_from(triangles)
     
     colors = ['w', 'r']
-    names = ['binaries', 'triangles']
+    names = ['binaries', 'triangles', 'not_spec']
     names = [n+str(dis) for n in names]
     
-    for k, g in enumerate([B, T]):
-        num = 1
+    num = 1
+    for k, g in enumerate([B, T, G]):
+        
     
         xy_nodes = coords[g.nodes(), ::-1]
         pos = {n: p for n, p in zip(g.nodes(), xy_nodes)}
@@ -81,5 +88,5 @@ for dis in dists:
         reestr[max_clique_name].iloc[clique] = num
         num += 1
 
-reestr.sort_values(by=['№ проявления УВ (после кластеризации)  '], inplace=True)
-reestr.to_csv('1209clusteriz_30-3000.csv', sep=';')
+#reestr.sort_values(by=['№ проявления УВ (после кластеризации)  '], inplace=True)
+reestr.to_csv('2510clusteriz_2000.csv', sep=';')
