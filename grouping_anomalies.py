@@ -25,10 +25,10 @@ distm = DistanceMetric.get_metric(metric='haversine')
 #reestr.sort_values(by=['y', 'x'], ascending=[0, 1], inplace=True)
 #reestr = reestr[reestr['Физические проявления в водной среде (толща, поверхн.)']=='пропарина']
 
-reestr = pd.read_csv('d:\\Smaga\\bitbucket\\datascience\\baikal_geology\\prop_for_clusters.csv', sep=';', encoding='utf8')
-reestr = reestr[reestr['zaverka_20'] != 'не подтвердилась в результате наблюдений в 2016 году']
+reestr = pd.read_csv('d:\\work\\BAIKAL\\Geology\\2210catalogUV_GIS.csv', sep=';', encoding='cp1251')
+reestr = reestr[~((reestr['Тип строки'] == 'ретро') & (reestr[' + - связь ретро и ФЦП'] == ' +'))]
 
-coords = reestr[['Y', 'X']].as_matrix()
+coords = reestr[['y', 'x']].as_matrix()
 yx = coords / 57.29578
 D = distm.pairwise(yx)
 
@@ -89,4 +89,4 @@ for dis in dists:
         num += 1
 
 #reestr.sort_values(by=['№ проявления УВ (после кластеризации)  '], inplace=True)
-reestr.to_csv('2510clusteriz_2000.csv', sep=';')
+reestr.to_csv('0711clusteriz_2000.csv', sep=';')
